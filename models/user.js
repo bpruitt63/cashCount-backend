@@ -24,7 +24,8 @@ class User {
         );
 
         let user = result.rows[0];
-        if (!user.active) throw new UnauthorizedError("User is inactive");
+
+        if (user && !user.active) throw new UnauthorizedError("User is inactive");
         
         if (user) {
             const isValid = await bcrypt.compare(password, user.password);
@@ -65,7 +66,7 @@ class User {
                     admin)
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING email, first_name AS "firstName", 
-                    last_name AS "lastName", admin`,
+                    last_name AS "lastName", active, admin`,
             [email, hashedPwd, firstName, lastName, active, admin]
         );
 
@@ -100,6 +101,7 @@ class User {
             FROM users`
         );
         const users = result.rows;
+
         if (!users[0]) throw new NotFoundError("No users found");
         
         return users;

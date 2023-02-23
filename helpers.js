@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { SECRET_KEY } = require("./config");
+const { BadRequestError } = require("./expressError");
 
 
 /** Creates jsonwebtoken with user information */

@@ -2,7 +2,8 @@ const jwt = require("jsonwebtoken");
 const { UnauthorizedError } = require("../expressError");
 const { authenticateJWT, 
         ensureLoggedIn,
-        ensureAdmin } = require("../middleware/auth");
+        ensureAdmin,
+        ensureCorrectUserOrAdmin } = require("../middleware/auth");
 
 
 const { SECRET_KEY } = require("../config");
@@ -79,5 +80,101 @@ describe("ensureLoggedIn", function () {
             expect(err instanceof UnauthorizedError).toBeTruthy();
         };
         ensureLoggedIn(req, res, next);
+    });
+});
+
+
+describe("ensureAdmin", function () {
+    test("works", function () {
+        expect.assertions(1);
+        const req = {};
+        const res = { locals: { user: { email: 'test@test.com',
+                                firstName: "Bob",
+                                lastName: "Testy",
+                                active: true,
+                                admin: true }}};
+        const next = function (err) {
+            expect(err).toBeFalsy();
+        };
+        ensureAdmin(req, res, next);
+    });
+  
+    test("unauth if not admin", function () {
+        expect.assertions(1);
+        const req = {};
+        const res = { locals: { user: { email: 'test@test.com',
+                                firstName: "Bob",
+                                lastName: "Testy",
+                                active: true,
+                                admin: false }}};
+        const next = function (err) {
+            expect(err instanceof UnauthorizedError).toBeTruthy();
+        };
+        ensureAdmin(req, res, next);
+    });
+  
+    test("unauth if anon", function () {
+        expect.assertions(1);
+        const req = {};
+        const res = { locals: {} };
+        const next = function (err) {
+            expect(err instanceof UnauthorizedError).toBeTruthy();
+        };
+        ensureAdmin(req, res, next);
+    });
+});
+
+
+describe("ensureCorrectUserOrAdmin", function () {
+    test("works: admin", function () {
+        expect.assertions(1);
+        const req = { params: { id: 1 } };
+        const res = { locals: { user: { email: 'test@test.com',
+                                firstName: "Bob",
+                                lastName: "Testy",
+                                active: true,
+                                admin: true }}};
+        const next = function (err) {
+            expect(err).toBeFalsy();
+        };
+        ensureCorrectUserOrAdmin(req, res, next);
+    });
+  
+    test("works: correct user", function () {
+        expect.assertions(1);
+        const req = { params: { id: 1, email: 'test@test.com'} };
+        const res = { locals: { user: { email: 'test@test.com',
+                                firstName: "Bob",
+                                lastName: "Testy",
+                                active: true,
+                                admin: false }}};
+        const next = function (err) {
+            expect(err).toBeFalsy();
+        };
+        ensureCorrectUserOrAdmin(req, res, next);
+    });
+  
+    test("unauth: wrong user", function () {
+        expect.assertions(1);
+        const req = { params: { id: 1, email: 'nope@test.com'} };
+        const res = { locals: { user: { email: 'test@test.com',
+                                firstName: "Bob",
+                                lastName: "Testy",
+                                active: true,
+                                superAdmin: false}}};
+        const next = function (err) {
+            expect(err instanceof UnauthorizedError).toBeTruthy();
+        };
+        ensureCorrectUserOrAdmin(req, res, next);
+    });
+  
+    test("unauth: if anon", function () {
+        expect.assertions(1);
+        const req = { params: { id: 1 } };
+        const res = { locals: {} };
+        const next = function (err) {
+            expect(err instanceof UnauthorizedError).toBeTruthy();
+        };
+        ensureCorrectUserOrAdmin(req, res, next);
     });
 });
