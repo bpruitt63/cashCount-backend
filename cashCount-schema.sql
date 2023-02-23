@@ -1,0 +1,29 @@
+CREATE TABLE users (
+    email TEXT PRIMARY KEY,
+    password TEXT NOT NULL,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    admin BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE TABLE containers (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    target NUMERIC(7, 2) NOT NULL,
+    threshold NUMERIC(5, 2) NOT NULL
+);
+
+CREATE TABLE counts (
+    id SERIAL PRIMARY KEY,
+    email TEXT REFERENCES users ON DELETE SET NULL,
+    container_id INTEGER REFERENCES containers ON DELETE CASCADE,
+    cash NUMERIC(7, 2) NOT NULL
+);
+
+CREATE TABLE notes (
+    id SERIAL PRIMARY KEY,
+    email TEXT REFERENCES users ON DELETE SET NULL,
+    count_id INTEGER REFERENCES counts ON DELETE CASCADE,
+    note TEXT NOT NULL
+);

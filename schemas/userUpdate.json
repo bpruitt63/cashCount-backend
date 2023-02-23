@@ -1,0 +1,30 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://example.com/userUpdate.json",
+    "type": "object",
+    "properties": {
+        "password": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 20
+        },
+        "firstName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+        },
+        "lastName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+        },
+        "active": {
+            "type": "boolean"
+        },
+        "admin": {
+            "type": "boolean"
+        }
+    },
+    "additionalProperties": false,
+    "required": []
+}
