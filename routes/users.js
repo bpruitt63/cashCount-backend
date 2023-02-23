@@ -99,3 +99,5 @@ router.get('/all', ensureAdmin, async function(req, res, next){
         return next(err);
     };
 });
+
+module.exports = router;
