@@ -1,6 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "http://example.com/userNew.json",
+    "$id": "http://example.com/adminNew.json",
     "type": "object",
     "properties": {
         "id": {
@@ -27,16 +27,7 @@
             "minLength": 1,
             "maxLength": 30
         },
-        "active": {
-            "type": "boolean"
-        },
         "superAdmin": {
-            "type": "boolean"
-        },
-        "companyAdmin": {
-            "type": "boolean"
-        },
-        "emailReceiver": {
             "type": "boolean"
         }
     },
@@ -44,6 +35,9 @@
     "required": [
         "id",
         "firstName",
-        "lastName"
+        "lastName",
+        "email",
+        "password",
+        "superAdmin"
     ]
 }
