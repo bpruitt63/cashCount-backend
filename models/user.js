@@ -28,7 +28,7 @@ class User {
 
         if (user && !user.superAdmin) {
             const result = await db.query(
-                `SELECT company_id AS "companyId",
+                `SELECT company_code AS "companyCode",
                         email_receiver AS "emailReceiver"
                 FROM company_admins WHERE user_id = $1`,
                 [id]
@@ -36,7 +36,8 @@ class User {
 
             if (!result.rows[0]) throw new UnauthorizedError('User is not admin');
 
-            user.companyId = result.rows[0].companyId;
+            user.adminCompanyCode = result.rows[0].companyCode;
+            user.userCompanyCode = result.rows[0].companyCode;
             user.emailReceiver = result.rows[0].emailReceiver;
         };
         
@@ -53,7 +54,7 @@ class User {
 
 
     static async create({id, email=null, password=null, firstName, 
-                        lastName, companyId=null, superAdmin=false,
+                        lastName, userCompanyCode=null, superAdmin=false,
                         companyAdmin=false, emailReceiver=false, active=true}) {
 
         //Check for duplicate id
@@ -93,25 +94,25 @@ class User {
         if (companyAdmin) {
             const adminResult = await db.query(
                 `INSERT INTO company_admins
-                        (user_id, company_id, email_receiver)
+                        (user_id, company_code, email_receiver)
                 VALUES ($1, $2, $3)
-                RETURNING company_id AS "companyId", email_receiver AS "emailReceiver"`,
-                [id, companyId, emailReceiver]
+                RETURNING company_code AS "companyCode", email_receiver AS "emailReceiver"`,
+                [id, userCompanyCode, emailReceiver]
             );
 
-            user.userCompanyId = adminResult.rows[0].companyId;
-            user.adminCompanyId = adminResult.rows[0].companyId;
+            user.userCompanyCode = adminResult.rows[0].companyCode;
+            user.adminCompanyCode = adminResult.rows[0].companyCode;
             user.emailReceiver = adminResult.rows[0].emailReceiver;
 
-        } else if (companyId) {
+        } else if (userCompanyCode) {
             const companyResult = await db.query(
                 `INSERT INTO company_users
-                        (user_id, company_id, active)
+                        (user_id, company_code, active)
                 VALUES ($1, $2, $3)
-                RETURNING company_id AS "companyId", active`,
-                [id, companyId, active]
+                RETURNING company_code AS "companyCode", active`,
+                [id, userCompanyCode, active]
             );
-            user.userCompanyId = companyResult.rows[0].companyId;
+            user.userCompanyCode = companyResult.rows[0].companyCode;
             user.active = companyResult.rows[0].active;
         };
 
@@ -127,9 +128,9 @@ class User {
                     first_name AS "firstName",
                     last_name AS "lastName",
                     super_admin AS "superAdmin",
-                    company_admins.company_id AS "adminCompanyId",
+                    company_admins.company_code AS "adminCompanyCode",
                     email_receiver AS "emailReceiver",
-                    company_users.company_id AS "userCompanyId",
+                    company_users.company_code AS "userCompanyCode",
                     active
             FROM users LEFT JOIN company_admins ON
                 users.id = company_admins.user_id
@@ -140,33 +141,33 @@ class User {
         const user = result.rows[0];
         if (!user) throw new NotFoundError(`No user with id: ${id}`);
 
-        if (user.adminCompanyId) user.userCompanyId = user.adminCompanyId;
+        if (user.adminCompanyCode) user.userCompanyCode = user.adminCompanyCode;
 
         return user;
     };
 
 
-    static async getAll(companyId) {
+    static async getAll(companyCode) {
         const result = await db.query(
             `SELECT users.id,
                     email,
                     first_name AS "firstName",
                     last_name AS "lastName",
                     super_admin AS "superAdmin",
-                    company_admins.company_id AS "adminCompanyId",
+                    company_admins.company_code AS "adminCompanyCode",
                     email_receiver AS "emailReceiver",
-                    company_users.company_id AS "userCompanyId",
+                    company_users.company_code AS "userCompanyCode",
                     active
             FROM users LEFT JOIN company_users ON 
                 users.id = company_users.user_id 
                 LEFT JOIN company_admins ON company_admins.user_id =
-                users.id WHERE company_users.company_id = $1
-                OR company_admins.company_id = $1`,
-            [companyId]
+                users.id WHERE company_users.company_code = $1
+                OR company_admins.company_code = $1`,
+            [companyCode]
         );
         const users = result.rows;
         for (let user of users) {
-            if (user.adminCompanyId) user.userCompanyId = user.adminCompanyId;
+            if (user.adminCompanyCode) user.userCompanyCode = user.adminCompanyCode;
         };
 
         if (!users[0]) throw new NotFoundError("No users found");

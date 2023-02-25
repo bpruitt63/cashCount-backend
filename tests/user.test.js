@@ -10,7 +10,7 @@ const {
     commonBeforeEach,
     commonAfterEach,
     commonAfterAll,
-    testCompanyIds
+    testCompanyCodes
 } = require("./testCommonModels");
 
 beforeAll(commonBeforeAll);
@@ -29,7 +29,8 @@ describe("login", function () {
             firstName: "Barb",
             lastName: "Tasty",
             superAdmin: false,
-            companyId: testCompanyIds[0],
+            userCompanyCode: testCompanyCodes[0],
+            adminCompanyCode: testCompanyCodes[0],
             emailReceiver: true
         });
     });
@@ -110,10 +111,10 @@ describe("create", function () {
     test("works: adds company user", async function () {
         const user = await User.create({
             ...newUser,
-            companyId: testCompanyIds[0]
+            userCompanyCode: testCompanyCodes[0]
         });
         expect(user).toEqual({ ...newUser, email: null,
-                                userCompanyId: testCompanyIds[0],
+                                userCompanyCode: testCompanyCodes[0],
                                 active: true });
         const found = await db.query("SELECT * FROM users WHERE id = 'test4'");
         expect(found.rows.length).toEqual(1);
@@ -127,12 +128,12 @@ describe("create", function () {
             companyAdmin: true,
             email: 'test4@test.com',
             password: 'password',
-            companyId: testCompanyIds[0],
+            userCompanyCode: testCompanyCodes[0],
             emailReceiver: true
         });
         expect(user).toEqual({ ...newUser, 
-                                userCompanyId: testCompanyIds[0],
-                                adminCompanyId: testCompanyIds[0],
+                                userCompanyCode: testCompanyCodes[0],
+                                adminCompanyCode: testCompanyCodes[0],
                                 email: 'test4@test.com',
                                 emailReceiver: true });
         const found = await db.query("SELECT * FROM users WHERE id = 'test4'");
@@ -143,14 +144,8 @@ describe("create", function () {
 
     test("bad request with dup data", async function () {
         try {
-            await User.create({
-            ...newUser,
-            password: "password",
-            });
-            await User.create({
-            ...newUser,
-            password: "password",
-            });
+            await User.create(newUser);
+            await User.create(newUser);
             fail();
         } catch (err) {
             expect(err instanceof BadRequestError).toBeTruthy();
@@ -170,8 +165,8 @@ describe("get", function(){
                 lastName: "Testy",
                 superAdmin: true,
                 active: null,
-                adminCompanyId: null,
-                userCompanyId: null,
+                adminCompanyCode: null,
+                userCompanyCode: null,
                 emailReceiver: null
             });
     });
@@ -186,8 +181,8 @@ describe("get", function(){
                 lastName: "Toasty",
                 active: true,
                 superAdmin: false,
-                adminCompanyId: null,
-                userCompanyId: testCompanyIds[0],
+                adminCompanyCode: null,
+                userCompanyCode: testCompanyCodes[0],
                 emailReceiver: null
             });
     });
@@ -202,8 +197,8 @@ describe("get", function(){
                 lastName: "Tasty",
                 active: null,
                 superAdmin: false,
-                adminCompanyId: testCompanyIds[0],
-                userCompanyId: testCompanyIds[0],
+                adminCompanyCode: testCompanyCodes[0],
+                userCompanyCode: testCompanyCodes[0],
                 emailReceiver: true
             });
     });
@@ -221,7 +216,7 @@ describe("get", function(){
 //Get all
 describe("getAll", function(){
     test("works", async function(){
-        const users = await User.getAll(testCompanyIds[0]);
+        const users = await User.getAll(testCompanyCodes[0]);
         expect(users).toEqual([{
                 id: 'test2',
                 email: "test2@test.com",
@@ -229,8 +224,8 @@ describe("getAll", function(){
                 lastName: "Tasty",
                 active: null,
                 superAdmin: false,
-                adminCompanyId: testCompanyIds[0],
-                userCompanyId: testCompanyIds[0],
+                adminCompanyCode: testCompanyCodes[0],
+                userCompanyCode: testCompanyCodes[0],
                 emailReceiver: true
         },
         {
@@ -240,8 +235,8 @@ describe("getAll", function(){
                 lastName: "Toasty",
                 active: true,
                 superAdmin: false,
-                adminCompanyId: null,
-                userCompanyId: testCompanyIds[0],
+                adminCompanyCode: null,
+                userCompanyCode: testCompanyCodes[0],
                 emailReceiver: null
         }]);
     });

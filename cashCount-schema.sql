@@ -1,6 +1,5 @@
 CREATE TABLE companies (
-    id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL
+    company_code TEXT PRIMARY KEY
 );
 
 CREATE TABLE users (
@@ -14,21 +13,22 @@ CREATE TABLE users (
 
 CREATE TABLE company_admins (
     user_id VARCHAR REFERENCES users ON DELETE CASCADE,
-    company_id INTEGER REFERENCES companies ON DELETE CASCADE,
+    company_code TEXT REFERENCES companies ON DELETE CASCADE,
     email_receiver BOOLEAN NOT NULL DEFAULT FALSE,
-    PRIMARY KEY (user_id, company_id)
+    PRIMARY KEY (user_id, company_code)
 );
 
 CREATE TABLE company_users(
     user_id VARCHAR REFERENCES users ON DELETE CASCADE,
-    company_id INTEGER REFERENCES companies ON DELETE CASCADE,
+    company_code TEXT REFERENCES companies ON DELETE CASCADE,
     active BOOLEAN NOT NULL DEFAULT TRUE,
-    PRIMARY KEY (user_id, company_id)
+    PRIMARY KEY (user_id, company_code)
 );
 
 CREATE TABLE containers (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
+    company_code TEXT REFERENCES companies ON DELETE CASCADE,
     target NUMERIC(7, 2) NOT NULL,
     pos_threshold NUMERIC(5, 2) NOT NULL,
     neg_threshold NUMERIC(5, 2) NOT NULL

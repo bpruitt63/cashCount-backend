@@ -3,6 +3,9 @@
     "$id": "http://example.com/userNew.json",
     "type": "object",
     "properties": {
+        "id": {
+            "type": "string"
+        },
         "email": {
             "type": "string",
             "minLength": 6,
@@ -27,14 +30,14 @@
         "active": {
             "type": "boolean"
         },
-        "admin": {
+        "superAdmin": {
             "type": "boolean"
         }
     },
     "additionalProperties": false,
     "required": [
-        "email",
-        "pwd",
+        "id",
+        "password",
         "firstName",
         "lastName"
     ]

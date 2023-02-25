@@ -88,11 +88,11 @@ describe("ensureAdmin", function () {
     test("works", function () {
         expect.assertions(1);
         const req = {};
-        const res = { locals: { user: { email: 'test@test.com',
+        const res = { locals: { user: { id: 'test',
+                                email: 'test@test.com',
                                 firstName: "Bob",
                                 lastName: "Testy",
-                                active: true,
-                                admin: true }}};
+                                superAdmin: true }}};
         const next = function (err) {
             expect(err).toBeFalsy();
         };
@@ -101,12 +101,12 @@ describe("ensureAdmin", function () {
   
     test("unauth if not admin", function () {
         expect.assertions(1);
-        const req = {};
-        const res = { locals: { user: { email: 'test@test.com',
+        const req = { params: {companyCode: 'testco'} };
+        const res = { locals: { user: { id: 'test',
+                                email: 'test@test.com',
                                 firstName: "Bob",
                                 lastName: "Testy",
-                                active: true,
-                                admin: false }}};
+                                superAdmin: false }}};
         const next = function (err) {
             expect(err instanceof UnauthorizedError).toBeTruthy();
         };
@@ -128,12 +128,12 @@ describe("ensureAdmin", function () {
 describe("ensureCorrectUserOrAdmin", function () {
     test("works: admin", function () {
         expect.assertions(1);
-        const req = { params: { id: 1 } };
-        const res = { locals: { user: { email: 'test@test.com',
+        const req = { params: {companyCode: 'testco'} };
+        const res = { locals: { user: { id: 'test',
+                                email: 'test@test.com',
                                 firstName: "Bob",
                                 lastName: "Testy",
-                                active: true,
-                                admin: true }}};
+                                superAdmin: true }}};
         const next = function (err) {
             expect(err).toBeFalsy();
         };
@@ -142,12 +142,12 @@ describe("ensureCorrectUserOrAdmin", function () {
   
     test("works: correct user", function () {
         expect.assertions(1);
-        const req = { params: { id: 1, email: 'test@test.com'} };
-        const res = { locals: { user: { email: 'test@test.com',
+        const req = { params: {companyCode: 'testco', email: 'test@test.com' }};
+        const res = { locals: { user: { id: 'test',
+                                email: 'test@test.com',
                                 firstName: "Bob",
                                 lastName: "Testy",
-                                active: true,
-                                admin: false }}};
+                                superAdmin: false }}};
         const next = function (err) {
             expect(err).toBeFalsy();
         };
@@ -156,11 +156,11 @@ describe("ensureCorrectUserOrAdmin", function () {
   
     test("unauth: wrong user", function () {
         expect.assertions(1);
-        const req = { params: { id: 1, email: 'nope@test.com'} };
-        const res = { locals: { user: { email: 'test@test.com',
+        const req = { params: { companyCode: 'testco', email: 'nope@test.com'} };
+        const res = { locals: { user: { id: 'test',
+                                email: 'test@test.com',
                                 firstName: "Bob",
                                 lastName: "Testy",
-                                active: true,
                                 superAdmin: false}}};
         const next = function (err) {
             expect(err instanceof UnauthorizedError).toBeTruthy();
@@ -170,7 +170,7 @@ describe("ensureCorrectUserOrAdmin", function () {
   
     test("unauth: if anon", function () {
         expect.assertions(1);
-        const req = { params: { id: 1 } };
+        const req = { params: { companyCode: 'testco' } };
         const res = { locals: {} };
         const next = function (err) {
             expect(err instanceof UnauthorizedError).toBeTruthy();

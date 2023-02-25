@@ -3,53 +3,46 @@ const jwt = require("jsonwebtoken");
 const { SECRET_KEY } = require("../config");
 
 describe("createToken", function () {
-    test("works: not active", function () {
-        const token = createToken({ email: 'test@test.com',
+    test("works: super admin", function () {
+        const token = createToken({ id: 'test',
+                                    email: 'test@test.com',
                                     firstName: "test", 
                                     lastName: "name",
-                                    active: false,
-                                    admin: false });
+                                    superAdmin: true });
         const payload = jwt.verify(token, SECRET_KEY);
         expect(payload).toEqual({
             iat: expect.any(Number),
             user: {
+                id: 'test',
                 email: 'test@test.com',
                 firstName: "test",
                 lastName: "name",
-                active: false,
-                admin: false
+                superAdmin: true
             }});
     });
   
     test("works: admin", function () {
-        const token = createToken({ email: 'test@test.com',
+        const token = createToken({ id: 'test',
+                                    email: 'test@test.com',
                                     firstName: "test", 
                                     lastName: "name",
                                     active: true,
-                                    admin: true });
+                                    superAdmin: false,
+                                    userCompanyCode: 'testco',
+                                    adminCompanyCode: 'testco',
+                                    emailReceiver: true });
         const payload = jwt.verify(token, SECRET_KEY);
         expect(payload).toEqual({
             iat: expect.any(Number),
-            user: {
-                email: 'test@test.com',
-                firstName: "test",
-                lastName: "name",
-                active: true,
-                admin: true
-            }});
-    });
-  
-    test("works: default active no admin", function () {
-        const token = createToken({ email: 'test@test.com', firstName: "test", lastName: "name" });
-        const payload = jwt.verify(token, SECRET_KEY);
-        expect(payload).toEqual({
-            iat: expect.any(Number),
-            user: {
-                email: 'test@test.com',
-                firstName: "test",
-                lastName: "name",
-                active: true,
-                admin: false
+            user: { id: 'test',
+                    email: 'test@test.com',
+                    firstName: "test", 
+                    lastName: "name",
+                    active: true,
+                    superAdmin: false,
+                    userCompanyCode: 'testco',
+                    adminCompanyCode: 'testco',
+                    emailReceiver: true
             }});
     });
 });

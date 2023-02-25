@@ -20,8 +20,8 @@ router.post('/login', async function(req, res, next) {
             throw new BadRequestError(errs);
         };
 
-        const {email, password} = req.body;
-        let user = await User.login(email, password);
+        const {id, password} = req.body;
+        let user = await User.login(id, password);
         const token = createToken(user);
 
         return res.json({token});
@@ -41,7 +41,7 @@ router.post('/create', ensureAdmin, async function(req, res, next){
         };
 
         const {email, password, firstName, lastName, active, admin} = req.body;
-        let user = await User.create({email, pwd, firstName, lastName, active, admin});
+        let user = await User.create({email, password, firstName, lastName, active, admin});
         return res.json({user});
     } catch(err) {
         return next(err);

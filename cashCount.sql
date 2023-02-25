@@ -4,7 +4,6 @@ CREATE DATABASE cash_count;
 
 \i cashCount-schema.sql
 \i cashCount-seed.sql
-CREATE EXTENSION pg_trgm;
 
 DROP DATABASE IF EXISTS cash_count_test;
 CREATE DATABASE cash_count_test;

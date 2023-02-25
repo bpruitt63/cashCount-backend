@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const db = require("../db.js");
 const { BCRYPT_WORK_FACTOR } = require("../config");
 
-let testCompanyIds = [];
+let testCompanyCodes = [];
 
 async function commonBeforeAll() {
     await db.query("DELETE FROM users");
@@ -15,10 +15,10 @@ async function commonBeforeAll() {
     await db.query("DELETE FROM notes");
 
 
-    const company = await db.query(`INSERT INTO companies (name) 
+    const company = await db.query(`INSERT INTO companies (company_code) 
                                     VALUES ('testco')
-                                    RETURNING id`);
-    testCompanyIds.splice(0, 0, ...company.rows.map(r => r.id));
+                                    RETURNING company_code`);
+    testCompanyCodes.splice(0, 0, ...company.rows.map(r => r.company_code));
 
     await db.query(`
     INSERT INTO users (id, email, password, first_name, last_name, super_admin)
@@ -43,12 +43,12 @@ async function commonBeforeAll() {
             [await bcrypt.hash("password", BCRYPT_WORK_FACTOR)]);
 
     await db.query(`
-    INSERT INTO company_admins (user_id, company_id, email_receiver)
-    VALUES ('test2', $1, TRUE)`, [testCompanyIds[0]]);
+    INSERT INTO company_admins (user_id, company_code, email_receiver)
+    VALUES ('test2', $1, TRUE)`, [testCompanyCodes[0]]);
 
     await db.query(`
-    INSERT INTO company_users (user_id, company_id, active)
-    VALUES ('test3', $1, TRUE)`, [testCompanyIds[0]]);
+    INSERT INTO company_users (user_id, company_code, active)
+    VALUES ('test3', $1, TRUE)`, [testCompanyCodes[0]]);
 
 };
 
@@ -69,5 +69,5 @@ module.exports = {
     commonBeforeEach,
     commonAfterAll,
     commonAfterEach,
-    testCompanyIds
+    testCompanyCodes
 };
