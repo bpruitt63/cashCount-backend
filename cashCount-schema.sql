@@ -1,17 +1,37 @@
+CREATE TABLE companies (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL
+);
+
 CREATE TABLE users (
-    email TEXT PRIMARY KEY,
-    password TEXT NOT NULL,
+    id VARCHAR PRIMARY KEY,
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
+    super_admin BOOLEAN NOT NULL DEFAULT FALSE,
+    email TEXT,
+    password TEXT
+);
+
+CREATE TABLE company_admins (
+    user_id VARCHAR REFERENCES users ON DELETE CASCADE,
+    company_id INTEGER REFERENCES companies ON DELETE CASCADE,
+    email_receiver BOOLEAN NOT NULL DEFAULT FALSE,
+    PRIMARY KEY (user_id, company_id)
+);
+
+CREATE TABLE company_users(
+    user_id VARCHAR REFERENCES users ON DELETE CASCADE,
+    company_id INTEGER REFERENCES companies ON DELETE CASCADE,
     active BOOLEAN NOT NULL DEFAULT TRUE,
-    admin BOOLEAN NOT NULL DEFAULT FALSE
+    PRIMARY KEY (user_id, company_id)
 );
 
 CREATE TABLE containers (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     target NUMERIC(7, 2) NOT NULL,
-    threshold NUMERIC(5, 2) NOT NULL
+    pos_threshold NUMERIC(5, 2) NOT NULL,
+    neg_threshold NUMERIC(5, 2) NOT NULL
 );
 
 CREATE TABLE counts (

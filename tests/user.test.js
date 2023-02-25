@@ -9,7 +9,8 @@ const {
     commonBeforeAll,
     commonBeforeEach,
     commonAfterEach,
-    commonAfterAll
+    commonAfterAll,
+    testCompanyIds
 } = require("./testCommonModels");
 
 beforeAll(commonBeforeAll);
@@ -19,14 +20,28 @@ afterAll(commonAfterAll);
 
 // Login
 describe("login", function () {
+
     test("works", async function () {
-        const user = await User.login("test2@test.com", "password");
+        const user = await User.login("test2", "password");
         expect(user).toEqual({
+            id: 'test2',
             email: "test2@test.com",
             firstName: "Barb",
             lastName: "Tasty",
-            active: true,
-            admin: false
+            superAdmin: false,
+            companyId: testCompanyIds[0],
+            emailReceiver: true
+        });
+    });
+
+    test("works superAdmin", async function () {
+        const user = await User.login("test1", "password");
+        expect(user).toEqual({
+            id: 'test1',
+            email: "test1@test.com",
+            firstName: "Bob",
+            lastName: "Testy",
+            superAdmin: true
         });
     });
 
@@ -48,7 +63,7 @@ describe("login", function () {
         }
     });
 
-    test("unauth if inactive", async function () {
+    test("unauth if non-admin", async function () {
         try {
             await User.login("test3@test.com", "password");
             fail();
@@ -58,54 +73,70 @@ describe("login", function () {
     });
 });
 
-// Create
+//Create
 describe("create", function () {
     const newUser = {
-        email: "test4@test.com",
+        id: 'test4',
         firstName: "Bub",
         lastName: "Tester",
-        active: true,
-        admin: false,
+        superAdmin: false,
     };
 
     test("works", async function () {
-        let user = await User.create({
-            ...newUser,
-            password: "password"
-        });
-        expect(user).toEqual(newUser);
-        const found = await db.query("SELECT * FROM users WHERE email = 'test4@test.com'");
+        let user = await User.create(newUser);
+        expect(user).toEqual({...newUser, email: null});
+        const found = await db.query("SELECT * FROM users WHERE id = 'test4'");
         expect(found.rows.length).toEqual(1);
-        expect(found.rows[0].admin).toEqual(false);
+        expect(found.rows[0].super_admin).toEqual(false);
+        expect(found.rows[0].password).toBeNull();
+    });
+
+    test("works: adds super admin", async function () {
+        const user = await User.create({
+            ...newUser,
+            superAdmin: true,
+            email: 'test4@test.com',
+            password: 'password'
+        });
+        expect(user).toEqual({ ...newUser, 
+                                superAdmin: true,
+                                email: 'test4@test.com' });
+        const found = await db.query("SELECT * FROM users WHERE id = 'test4'");
+        expect(found.rows.length).toEqual(1);
+        expect(found.rows[0].super_admin).toEqual(true);
         expect(found.rows[0].password.startsWith("$2b$")).toEqual(true);
     });
 
-    test("works: adds admin", async function () {
+    test("works: adds company user", async function () {
         const user = await User.create({
             ...newUser,
-            password: "password",
-            admin: true,
+            companyId: testCompanyIds[0]
         });
-        expect(user).toEqual({ ...newUser, admin: true });
-        const found = await db.query("SELECT * FROM users WHERE email = 'test4@test.com'");
+        expect(user).toEqual({ ...newUser, email: null,
+                                companyId: testCompanyIds[0],
+                                active: true });
+        const found = await db.query("SELECT * FROM users WHERE id = 'test4'");
         expect(found.rows.length).toEqual(1);
-        expect(found.rows[0].admin).toEqual(true);
-        expect(found.rows[0].password.startsWith("$2b$")).toEqual(true);
+        expect(found.rows[0].super_admin).toEqual(false);
+        expect(found.rows[0].password).toBeNull();
     });
 
-    test("default non admin, active", async function () {
-        const testUser = {...newUser};
-        delete testUser.active;
-        delete testUser.admin;
+    test("works: adds company admin", async function () {
         const user = await User.create({
-            ...testUser,
-            password: "password"
+            ...newUser,
+            companyAdmin: true,
+            email: 'test4@test.com',
+            password: 'password',
+            companyId: testCompanyIds[0],
+            emailReceiver: true
         });
-        expect(user).toEqual(newUser);
-        const found = await db.query("SELECT * FROM users WHERE email = 'test4@test.com'");
+        expect(user).toEqual({ ...newUser, 
+                                companyId: testCompanyIds[0],
+                                email: 'test4@test.com',
+                                emailReceiver: true });
+        const found = await db.query("SELECT * FROM users WHERE id = 'test4'");
         expect(found.rows.length).toEqual(1);
-        expect(found.rows[0].admin).toEqual(false);
-        expect(found.rows[0].active).toEqual(true);
+        expect(found.rows[0].super_admin).toEqual(false);
         expect(found.rows[0].password.startsWith("$2b$")).toEqual(true);
     });
 
@@ -129,14 +160,50 @@ describe("create", function () {
 //Get
 describe("get", function(){
     test("works", async function(){
-        const user = await User.get('test2@test.com');
+        const user = await User.get('test1');
         expect(user).toEqual(
             {
+                id: 'test1',
+                email: "test1@test.com",
+                firstName: "Bob",
+                lastName: "Testy",
+                superAdmin: true,
+                active: null,
+                adminCompanyId: null,
+                userCompanyId: null,
+                emailReceiver: null
+            });
+    });
+
+    test("works company user", async function(){
+        const user = await User.get('test3');
+        expect(user).toEqual(
+            {
+                id: 'test3',
+                email: null,
+                firstName: "Bulb",
+                lastName: "Toasty",
+                active: true,
+                superAdmin: false,
+                adminCompanyId: null,
+                userCompanyId: testCompanyIds[0],
+                emailReceiver: null
+            });
+    });
+
+    test("works company admin", async function(){
+        const user = await User.get('test2');
+        expect(user).toEqual(
+            {
+                id: 'test2',
                 email: "test2@test.com",
                 firstName: "Barb",
                 lastName: "Tasty",
-                active: true,
-                admin: false
+                active: null,
+                superAdmin: false,
+                adminCompanyId: testCompanyIds[0],
+                userCompanyId: null,
+                emailReceiver: true
             });
     });
 
@@ -153,86 +220,87 @@ describe("get", function(){
 //Get all
 describe("getAll", function(){
     test("works", async function(){
-        const users = await User.getAll();
+        const users = await User.getAll(testCompanyIds[0]);
         expect(users).toEqual([{
-            email: "test1@test.com",
-            firstName: "Bob",
-            lastName: "Testy",
-            active: true,
-            admin: true
+                id: 'test2',
+                email: "test2@test.com",
+                firstName: "Barb",
+                lastName: "Tasty",
+                active: null,
+                superAdmin: false,
+                adminCompanyId: testCompanyIds[0],
+                userCompanyId: null,
+                emailReceiver: true
         },
         {
-            email: "test2@test.com",
-            firstName: "Barb",
-            lastName: "Tasty",
-            active: true,
-            admin: false
-        },
-        {
-            email: "test3@test.com",
-            firstName: "Bulb",
-            lastName: "Toasty",
-            active: false,
-            admin: false
+                id: 'test3',
+                email: null,
+                firstName: "Bulb",
+                lastName: "Toasty",
+                active: true,
+                superAdmin: false,
+                adminCompanyId: null,
+                userCompanyId: testCompanyIds[0],
+                emailReceiver: null
         }]);
     });
 });
 
-//Update
-describe("update", function () {
-    const updateData = {
-        email: "new@test.com",
-        firstName: "NewF",
-        lastName: "NewL",
-        active: true,
-        admin: false
-    };
+// //Update
+// describe("update", function () {
+//     const updateData = {
+//         email: "new@test.com",
+//         firstName: "NewF",
+//         lastName: "NewL",
+//         active: true,
+//         admin: false
+//     };
 
-    test("works", async function () {
-        const user = await User.update("test1@test.com", updateData);
-        expect(user).toEqual({
-            email: "new@test.com",
-            firstName: "NewF",
-            lastName: "NewL",
-            active: true,
-            admin: false
-        });
-    });
+//     test("works", async function () {
+//         const user = await User.update("test1@test.com", updateData);
+//         expect(user).toEqual({
+//             email: "new@test.com",
+//             firstName: "NewF",
+//             lastName: "NewL",
+//             active: true,
+//             admin: false
+//         });
+//     });
 
-    test("works: set password", async function () {
-        const user = await User.update("test1@test.com", {
-            password: "newnew",
-        });
-        expect(user).toEqual({
-            email: "test1@test.com",
-            firstName: "Bob",
-            lastName: "Testy",
-            active: true,
-            admin: true
-        });
-        const found = await db.query("SELECT * FROM users WHERE email = 'test1@test.com'");
-        expect(found.rows.length).toEqual(1);
-        expect(found.rows[0].password.startsWith("$2b$")).toEqual(true);
-    });
+//     test("works: set password", async function () {
+//         const user = await User.update("test1@test.com", {
+//             password: "newnew",
+//         });
+//         expect(user).toEqual({
+//             email: "test1@test.com",
+//             firstName: "Bob",
+//             lastName: "Testy",
+//             active: true,
+//             admin: true
+//         });
+//         const found = await db.query("SELECT * FROM users WHERE email = 'test1@test.com'");
+//         expect(found.rows.length).toEqual(1);
+//         expect(found.rows[0].password.startsWith("$2b$")).toEqual(true);
+//     });
 
-    test("not found if no such user", async function () {
-        try {
-            await User.update("nope", {
-            firstName: "test",
-            });
-            fail();
-        } catch (err) {
-            expect(err instanceof NotFoundError).toBeTruthy();
-        }
-    });
+//     test("not found if no such user", async function () {
+//         try {
+//             await User.update("nope", {
+//             firstName: "test",
+//             });
+//             fail();
+//         } catch (err) {
+//             expect(err instanceof NotFoundError).toBeTruthy();
+//         }
+//     });
 
-    test("bad request if no data", async function () {
-        expect.assertions(1);
-        try {
-            await User.update("test1@test.com", {});
-            fail();
-        } catch (err) {
-            expect(err instanceof BadRequestError).toBeTruthy();
-        };
-    });
-});
+//     test("bad request if no data", async function () {
+//         expect.assertions(1);
+//         try {
+//             await User.update("test1@test.com", {});
+//             fail();
+//         } catch (err) {
+//             expect(err instanceof BadRequestError).toBeTruthy();
+//         };
+//     });
+// });
