@@ -99,7 +99,8 @@ class User {
                 [id, companyId, emailReceiver]
             );
 
-            user.companyId = adminResult.rows[0].companyId;
+            user.userCompanyId = adminResult.rows[0].companyId;
+            user.adminCompanyId = adminResult.rows[0].companyId;
             user.emailReceiver = adminResult.rows[0].emailReceiver;
 
         } else if (companyId) {
@@ -110,7 +111,7 @@ class User {
                 RETURNING company_id AS "companyId", active`,
                 [id, companyId, active]
             );
-            user.companyId = companyResult.rows[0].companyId;
+            user.userCompanyId = companyResult.rows[0].companyId;
             user.active = companyResult.rows[0].active;
         };
 
@@ -119,6 +120,7 @@ class User {
 
 
     static async get(id) {
+
         const result = await db.query(
             `SELECT users.id,
                     email,
@@ -137,6 +139,9 @@ class User {
         );
         const user = result.rows[0];
         if (!user) throw new NotFoundError(`No user with id: ${id}`);
+
+        if (user.adminCompanyId) user.userCompanyId = user.adminCompanyId;
+
         return user;
     };
 
@@ -160,6 +165,9 @@ class User {
             [companyId]
         );
         const users = result.rows;
+        for (let user of users) {
+            if (user.adminCompanyId) user.userCompanyId = user.adminCompanyId;
+        };
 
         if (!users[0]) throw new NotFoundError("No users found");
         

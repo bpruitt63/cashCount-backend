@@ -113,7 +113,7 @@ describe("create", function () {
             companyId: testCompanyIds[0]
         });
         expect(user).toEqual({ ...newUser, email: null,
-                                companyId: testCompanyIds[0],
+                                userCompanyId: testCompanyIds[0],
                                 active: true });
         const found = await db.query("SELECT * FROM users WHERE id = 'test4'");
         expect(found.rows.length).toEqual(1);
@@ -131,7 +131,8 @@ describe("create", function () {
             emailReceiver: true
         });
         expect(user).toEqual({ ...newUser, 
-                                companyId: testCompanyIds[0],
+                                userCompanyId: testCompanyIds[0],
+                                adminCompanyId: testCompanyIds[0],
                                 email: 'test4@test.com',
                                 emailReceiver: true });
         const found = await db.query("SELECT * FROM users WHERE id = 'test4'");
@@ -202,14 +203,14 @@ describe("get", function(){
                 active: null,
                 superAdmin: false,
                 adminCompanyId: testCompanyIds[0],
-                userCompanyId: null,
+                userCompanyId: testCompanyIds[0],
                 emailReceiver: true
             });
     });
 
     test("fails no user", async function(){
         try {
-            await User.get("nope@nope.com");
+            await User.get("nope");
             fail();
         } catch (err) {
             expect(err instanceof NotFoundError).toBeTruthy();
@@ -229,7 +230,7 @@ describe("getAll", function(){
                 active: null,
                 superAdmin: false,
                 adminCompanyId: testCompanyIds[0],
-                userCompanyId: null,
+                userCompanyId: testCompanyIds[0],
                 emailReceiver: true
         },
         {
