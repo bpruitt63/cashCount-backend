@@ -6,12 +6,12 @@ const {
 const db = require("../db");
 const User = require("../models/user");
 const {
-    commonBeforeAll,
-    commonBeforeEach,
-    commonAfterEach,
-    commonAfterAll,
-    testCompanyCodes
-} = require("./testCommonModels");
+        commonBeforeAll,
+        commonBeforeEach,
+        commonAfterEach,
+        commonAfterAll,
+        testCompanyCodes
+    } = require("./testCommonModels");
 
 beforeAll(commonBeforeAll);
 beforeEach(commonBeforeEach);
