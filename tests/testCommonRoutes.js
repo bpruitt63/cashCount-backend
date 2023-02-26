@@ -1,6 +1,7 @@
 const db = require("../db.js");
 const User = require("../models/user");
 const Company = require('../models/company');
+const Container = require('../models/container');
 const { createToken } = require("../helpers");
 
 
@@ -51,6 +52,13 @@ async function commonBeforeAll() {
         password: 'password1'
     });
 
+    await Container.create({
+        name: 'testContainer',
+        companyCode: 'testco',
+        target: 500.00,
+        posThreshold: 5.00,
+        negThreshold: 2.00
+    });
 
 };
 
