@@ -6,6 +6,13 @@ const { BCRYPT_WORK_FACTOR } = require("../config");
 let testCompanyCodes = [];
 let testContainerIds = [];
 
+const date1 = new Date('26 February 2023 13:00:00');
+const date2 = new Date('1 March 2023 5:00:00');
+const date3 = new Date('8 March 2023 18:00:00');
+const stamp1 = date1.getTime();
+const stamp2 = date2.getTime();
+const stamp3 = date3.getTime();
+
 async function commonBeforeAll() {
     await db.query("DELETE FROM users");
     await db.query("DELETE FROM companies");
@@ -13,7 +20,6 @@ async function commonBeforeAll() {
     await db.query("DELETE FROM company_users");
     await db.query("DELETE FROM containers");
     await db.query("DELETE FROM counts");
-    await db.query("DELETE FROM notes");
 
 
     const company = await db.query(`INSERT INTO companies (company_code) 
@@ -57,6 +63,18 @@ async function commonBeforeAll() {
     ('testContainer2', $1, 150.00, 5.00, 2.25) RETURNING id`, [testCompanyCodes[0]]);
     testContainerIds.splice(0, 0, ...resultContainers.rows.map(r => r.id));
 
+    await db.query(`
+    INSERT INTO counts (container_id, cash, time, timestamp, note)
+    VALUES ($1, 500, $2, $3, 'testNote')`,[testContainerIds[0], date1, stamp1]);
+
+    await db.query(`
+    INSERT INTO counts (container_id, cash, time, timestamp, note)
+    VALUES ($1, 550, $2, $3, null)`,[testContainerIds[0], date2, stamp2]);
+
+    await db.query(`
+    INSERT INTO counts (container_id, cash, time, timestamp, note)
+    VALUES ($1, 70, $2, $3, null)`,[testContainerIds[0], date3, stamp3]);
+
 };
 
 async function commonBeforeEach() {
@@ -77,5 +95,8 @@ module.exports = {
     commonAfterAll,
     commonAfterEach,
     testCompanyCodes,
-    testContainerIds
+    testContainerIds,
+    stamp1,
+    stamp2,
+    stamp3
 };

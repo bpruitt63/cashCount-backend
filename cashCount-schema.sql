@@ -36,14 +36,9 @@ CREATE TABLE containers (
 
 CREATE TABLE counts (
     id SERIAL PRIMARY KEY,
-    email TEXT REFERENCES users ON DELETE SET NULL,
     container_id INTEGER REFERENCES containers ON DELETE CASCADE,
-    cash NUMERIC(7, 2) NOT NULL
-);
-
-CREATE TABLE notes (
-    id SERIAL PRIMARY KEY,
-    email TEXT REFERENCES users ON DELETE SET NULL,
-    count_id INTEGER REFERENCES counts ON DELETE CASCADE,
-    note TEXT NOT NULL
+    cash NUMERIC(7, 2) NOT NULL,
+    time TEXT NOT NULL,
+    timestamp BIGINT NOT NULL,
+    note TEXT
 );
