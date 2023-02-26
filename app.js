@@ -4,7 +4,8 @@ const cors = require("cors");
 const { NotFoundError } = require("./expressError");
 const { authenticateJWT } = require("./middleware/auth");
 const usersRoutes = require('./routes/users');
-// const organizationRoutes = require('./routes/organizations');
+const companyRoutes = require('./routes/companies');
+const containerRoutes = require('./routes/containers');
 
 const app = express();
 
@@ -13,7 +14,8 @@ app.use(express.json());
 app.use(authenticateJWT);
 
 app.use('/users', usersRoutes);
-// app.use('/organizations', organizationRoutes);
+app.use('/companies', companyRoutes);
+app.use('/containers', containerRoutes);
 
 app.use(function (req, res, next) {
     return next(new NotFoundError());

@@ -3,13 +3,10 @@
     "$id": "http://example.com/loginSchema.json",
     "type": "object",
     "properties": {
-        "email": {
-            "type": "string",
-            "minLength": 6,
-            "maxLength": 60,
-            "format": "email"
+        "id": {
+            "type": "string"
         },
-        "pwd": {
+        "password": {
             "type": "string",
             "minLength": 6,
             "maxLength": 20
@@ -17,7 +14,7 @@
     },
     "additionalProperties": false,
     "required": [
-      "email",
-      "pwd"
+      "id",
+      "password"
     ]
 }
