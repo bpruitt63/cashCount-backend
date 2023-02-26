@@ -12,7 +12,7 @@ describe("createToken", function () {
         const payload = jwt.verify(token, SECRET_KEY);
         expect(payload).toEqual({
             iat: expect.any(Number),
-            user: {
+            cashCountUser: {
                 id: 'test',
                 email: 'test@test.com',
                 firstName: "test",
@@ -34,7 +34,7 @@ describe("createToken", function () {
         const payload = jwt.verify(token, SECRET_KEY);
         expect(payload).toEqual({
             iat: expect.any(Number),
-            user: { id: 'test',
+            cashCountUser: { id: 'test',
                     email: 'test@test.com',
                     firstName: "test", 
                     lastName: "name",

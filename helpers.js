@@ -5,7 +5,7 @@ const { BadRequestError } = require("./expressError");
 
 /** Creates jsonwebtoken with user information */
 function createToken(user) {
-    let payload = {user};
+    let payload = {cashCountUser: user};
     return jwt.sign(payload, SECRET_KEY);
 };
 

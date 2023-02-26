@@ -28,6 +28,20 @@ class Company {
         return result.rows[0];
     };
 
+    static async get(companyCode) {
+
+        const result = await db.query(
+            `SELECT company_code
+            FROM companies
+            WHERE company_code = $1`,
+            [companyCode]
+        );
+
+        const company = result.rows[0];
+        if (!company) throw new BadRequestError(`Company ${companyCode} not found`);
+        return company;
+    };
+
 };
 
 module.exports = Company;

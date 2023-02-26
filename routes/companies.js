@@ -23,4 +23,14 @@ router.post('/new', ensureSuperAdmin, async function(req, res, next) {
     };
 });
 
+router.get('/:companyCode', async function(req, res, next) {
+    try {
+        const {companyCode} = req.params;
+        const company = await Company.get(companyCode);
+        return res.json(company);
+    } catch(err) {
+        return next(err);
+    };
+});
+
 module.exports = router;

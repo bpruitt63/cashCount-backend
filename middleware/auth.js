@@ -17,7 +17,7 @@ function authenticateJWT(req, res, next) {
 
 function ensureLoggedIn(req, res, next) {
     try {
-        if (!res.locals.user) throw new UnauthorizedError();
+        if (!res.locals.cashCountUser) throw new UnauthorizedError();
         return next();
     } catch (err) {
         return next(err);
@@ -26,7 +26,7 @@ function ensureLoggedIn(req, res, next) {
 
 function ensureAdmin(req, res, next) {
     try {
-        const user = res.locals.user;
+        const user = res.locals.cashCountUser;
         if (!user) throw new UnauthorizedError();
         if (!(user.superAdmin || user.adminCompanyCode === req.params.companyCode)) {
             throw new UnauthorizedError();
@@ -39,7 +39,7 @@ function ensureAdmin(req, res, next) {
 
 function ensureCorrectUserOrAdmin(req, res, next) {
     try {
-        const user = res.locals.user;
+        const user = res.locals.cashCountUser;
         if (!user) throw new UnauthorizedError();
         const admin = user.superAdmin || user.adminCompanyCode === req.params.companyCode;
         if (!(admin || user.email === req.params.email)) {
@@ -53,7 +53,7 @@ function ensureCorrectUserOrAdmin(req, res, next) {
 
 function ensureSuperAdmin(req, res, next) {
     try {
-        if (!(res.locals.user && res.locals.user.superAdmin)) {
+        if (!(res.locals.cashCountUser && res.locals.cashCountUser.superAdmin)) {
             throw new UnauthorizedError();
         };
         return next();
