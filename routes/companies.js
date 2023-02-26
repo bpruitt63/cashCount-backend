@@ -17,7 +17,7 @@ router.post('/new', ensureSuperAdmin, async function(req, res, next) {
         };
 
         const company = await Company.create(req.body.companyCode);
-        return res.json(company);
+        return res.json({company});
     } catch(err) {
         return next(err);
     };
@@ -27,7 +27,7 @@ router.get('/:companyCode', async function(req, res, next) {
     try {
         const {companyCode} = req.params;
         const company = await Company.get(companyCode);
-        return res.json(company);
+        return res.json({company});
     } catch(err) {
         return next(err);
     };

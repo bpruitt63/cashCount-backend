@@ -4,6 +4,7 @@ const db = require("../db.js");
 const { BCRYPT_WORK_FACTOR } = require("../config");
 
 let testCompanyCodes = [];
+let testContainerIds = [];
 
 async function commonBeforeAll() {
     await db.query("DELETE FROM users");
@@ -50,6 +51,12 @@ async function commonBeforeAll() {
     INSERT INTO company_users (user_id, company_code, active)
     VALUES ('test3', $1, TRUE)`, [testCompanyCodes[0]]);
 
+    const resultContainers = await db.query(`
+    INSERT INTO containers (name, company_code, target, pos_threshold, neg_threshold)
+    VALUES ('testContainer1', $1, 100.00, 5.00, 2.00),
+    ('testContainer2', $1, 150.00, 5.00, 2.25) RETURNING id`, [testCompanyCodes[0]]);
+    testContainerIds.splice(0, 0, ...resultContainers.rows.map(r => r.id));
+
 };
 
 async function commonBeforeEach() {
@@ -69,5 +76,6 @@ module.exports = {
     commonBeforeEach,
     commonAfterAll,
     commonAfterEach,
-    testCompanyCodes
+    testCompanyCodes,
+    testContainerIds
 };
