@@ -31,14 +31,16 @@ class Company {
     static async get(companyCode) {
 
         const result = await db.query(
-            `SELECT company_code
+            `SELECT companies.company_code AS "companyCode", id, name, target,
+            pos_threshold AS "posThreshold", neg_threshold AS "negThreshold"
             FROM companies
-            WHERE company_code = $1`,
+            LEFT JOIN containers ON containers.company_code = companies.company_code
+            WHERE companies.company_code = $1`,
             [companyCode]
         );
 
-        const company = result.rows[0];
-        if (!company) throw new BadRequestError(`Company ${companyCode} not found`);
+        const company = result.rows;
+        if (!company[0]) throw new BadRequestError(`Company ${companyCode} not found`);
         return company;
     };
 

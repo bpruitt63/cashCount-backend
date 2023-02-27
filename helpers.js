@@ -24,7 +24,21 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
     };
 };
 
+function formatCompany(companyData) {
+    const company = {};
+    company.companyCode = companyData[0].companyCode;
+    company.containers = {};
+    for (let co of companyData) {
+        company.containers[co.id] = {name: co.name,
+                                target: co.target,
+                                posThreshold: co.posThreshold,
+                                negThreshold: co.negThreshold}
+    };
+    return company;
+};
+
 module.exports = {
     createToken,
-    sqlForPartialUpdate
+    sqlForPartialUpdate,
+    formatCompany
 };
