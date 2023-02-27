@@ -104,7 +104,7 @@ router.post('/create/:companyCode', ensureAdmin, async function(req, res, next){
 
 router.get('/:companyCode/:id', ensureAdmin, async function(req, res, next){
     try {
-        let user = await User.get(req.params.id);
+        const user = await User.get(req.params.id);
         return res.json({user});
     } catch(err) {
         return next(err);

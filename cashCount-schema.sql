@@ -36,6 +36,7 @@ CREATE TABLE containers (
 
 CREATE TABLE counts (
     id SERIAL PRIMARY KEY,
+    user_id TEXT REFERENCES users ON DELETE SET NULL,
     container_id INTEGER REFERENCES containers ON DELETE CASCADE,
     cash NUMERIC(7, 2) NOT NULL,
     time TEXT NOT NULL,

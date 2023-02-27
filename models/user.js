@@ -1,6 +1,6 @@
 const db = require("../db");
 const bcrypt = require("bcrypt");
-const { sqlForPartialUpdate } = require("../helpers");
+//const { sqlForPartialUpdate } = require("../helpers");
 const {
   NotFoundError,
   BadRequestError,

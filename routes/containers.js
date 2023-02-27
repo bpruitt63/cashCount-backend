@@ -1,8 +1,11 @@
 const express = require("express");
 const jsonschema = require('jsonschema');
 const Container = require('../models/container');
+const Count = require('../models/count');
+const User = require('../models/user');
 const containerNewSchema = require('../schemas/containerNew.json');
-const { BadRequestError } = require('../expressError');
+const countSchema = require('../schemas/countSchema.json');
+const { BadRequestError, UnauthorizedError } = require('../expressError');
 const { ensureAdmin } = require("../middleware/auth");
 
 
@@ -29,6 +32,40 @@ router.get('/:companyCode/all', async function(req, res, next){
         const {companyCode} = req.params;
         const containers = await Container.getAll(companyCode);
         return res.json({containers});
+    } catch(err) {
+        return next(err);
+    };
+});
+
+router.post('/:containerId/count', async function(req, res, next) {
+    try {
+        const {containerId} = req.params;
+        const data = req.body;
+        const {userCompanyCode, superAdmin, active} = await User.get(data.userId);
+        const {companyCode} = await Container.get(containerId);
+        if (!(superAdmin || active && (userCompanyCode === companyCode))){
+            throw new UnauthorizedError('User is not authorized to post at this company');
+        };
+
+        const validator = jsonschema.validate(req.body, countSchema);
+        if (!validator.valid) {
+            const errs = validator.errors.map(e => e.stack);
+            throw new BadRequestError(errs);
+        };
+
+        const count = await Count.addCount({...data, containerId});
+        return res.json({count});
+    } catch(err) {
+        return next(err);
+    };
+});
+
+router.get('/:containerId/counts', async function(req, res, next) {
+    try {
+        const {containerId} = req.params;
+        const {startTime, endTime} = req.body;
+        const counts = await Count.getCounts(containerId, startTime, endTime);
+        return res.json({counts});
     } catch(err) {
         return next(err);
     };

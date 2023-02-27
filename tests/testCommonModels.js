@@ -64,16 +64,16 @@ async function commonBeforeAll() {
     testContainerIds.splice(0, 0, ...resultContainers.rows.map(r => r.id));
 
     await db.query(`
-    INSERT INTO counts (container_id, cash, time, timestamp, note)
-    VALUES ($1, 500, $2, $3, 'testNote')`,[testContainerIds[0], date1, stamp1]);
+    INSERT INTO counts (container_id, cash, time, timestamp, note, user_id)
+    VALUES ($1, 500, $2, $3, 'testNote', 'test1')`,[testContainerIds[0], date1, stamp1]);
 
     await db.query(`
-    INSERT INTO counts (container_id, cash, time, timestamp, note)
-    VALUES ($1, 550, $2, $3, null)`,[testContainerIds[0], date2, stamp2]);
+    INSERT INTO counts (container_id, cash, time, timestamp, note, user_id)
+    VALUES ($1, 550, $2, $3, null, 'test2')`,[testContainerIds[0], date2, stamp2]);
 
     await db.query(`
-    INSERT INTO counts (container_id, cash, time, timestamp, note)
-    VALUES ($1, 70, $2, $3, null)`,[testContainerIds[0], date3, stamp3]);
+    INSERT INTO counts (container_id, cash, time, timestamp, note, user_id)
+    VALUES ($1, 70, $2, $3, null, 'test3')`,[testContainerIds[0], date3, stamp3]);
 
 };
 

@@ -20,14 +20,15 @@ describe('addCount', function() {
     const time = new Date();
     const timestamp = time.getTime();
     test('works', async function() {
-        const count = await Count.addCount({containerId: testContainerIds[0], 
+        const count = await Count.addCount({containerId: testContainerIds[0], userId: 'test3',
                                         cash: 600, time, timestamp, note: null});
         expect(count).toEqual({containerId: testContainerIds[0], 
                                 id: expect.any(Number),
                                 cash: '600.00',
                                 time: expect.any(String),
                                 timestamp: timestamp.toString(),
-                                note: null});
+                                note: null,
+                                userId: 'test3'});
     });
 });
 
@@ -41,7 +42,8 @@ describe('getCounts', function() {
                                 cash: '70.00',
                                 time: expect.any(String),
                                 timestamp: stamp3.toString(),
-                                note: null
+                                note: null,
+                                userId: 'test3'
                                 },
                                 {
                                 id: expect.any(Number),
@@ -49,7 +51,8 @@ describe('getCounts', function() {
                                 cash: '550.00',
                                 time: expect.any(String),
                                 timestamp: stamp2.toString(),
-                                note: null
+                                note: null,
+                                userId: 'test2'
                                 },
                                 {
                                 id: expect.any(Number),
@@ -57,7 +60,8 @@ describe('getCounts', function() {
                                 cash: '500.00',
                                 time: expect.any(String),
                                 timestamp: stamp1.toString(),
-                                note: 'testNote'}])
+                                note: 'testNote',
+                                userId: 'test1'}])
     });
 
     test('filters by date', async function() {
@@ -68,7 +72,8 @@ describe('getCounts', function() {
                                 cash: '70.00',
                                 time: expect.any(String),
                                 timestamp: stamp3.toString(),
-                                note: null
+                                note: null,
+                                userId: 'test3'
                                 },
                                 {
                                 id: expect.any(Number),
@@ -76,7 +81,8 @@ describe('getCounts', function() {
                                 cash: '550.00',
                                 time: expect.any(String),
                                 timestamp: stamp2.toString(),
-                                note: null
+                                note: null,
+                                userId: 'test2'
                                 }])
-    })
+    });
 });
