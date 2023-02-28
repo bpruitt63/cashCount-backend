@@ -63,7 +63,8 @@ router.post('/:containerId/count', async function(req, res, next) {
 router.get('/:containerId/counts', async function(req, res, next) {
     try {
         const {containerId} = req.params;
-        const {startTime, endTime} = req.body;
+        const startTime = req.query.startTime;
+        const endTime = req.query.endTime;
         const counts = await Count.getCounts(containerId, startTime, endTime);
         return res.json({counts});
     } catch(err) {

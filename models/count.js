@@ -21,9 +21,11 @@ class Count {
 
     static async getCounts(containerId, startTime, endTime) {
         const result = await db.query(
-            `SELECT id, container_id AS "containerId", cash,
-                time, timestamp, note, user_id AS "userId"
-            FROM counts WHERE container_id = $1 AND
+            `SELECT counts.id, container_id AS "containerId", cash,
+                time, timestamp, note, user_id AS "userId",
+                first_name AS "firstName", last_name AS "lastName"
+            FROM counts JOIN users ON user_id = users.id
+            WHERE container_id = $1 AND
                 timestamp >= $2 AND timestamp <= $3
             ORDER BY timestamp DESC`,
             [containerId, startTime, endTime]
