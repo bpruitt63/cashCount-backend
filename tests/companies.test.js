@@ -22,7 +22,7 @@ describe('POST /companies/new', function() {
             .post("/companies/new")
             .send({companyCode: "newCompany"})
             .set("authorization", `Bearer ${bobToken}`);
-        expect(resp.body).toEqual({companyCode: "newCompany"});
+        expect(resp.body).toEqual({company: {companyCode: "newCompany"}});
     });
 
     test('fails company admin', async function() {
