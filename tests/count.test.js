@@ -43,7 +43,9 @@ describe('getCounts', function() {
                                 time: expect.any(String),
                                 timestamp: stamp3.toString(),
                                 note: null,
-                                userId: 'test3'
+                                userId: 'test3',
+                                firstName: 'Bulb',
+                                lastName: 'Toasty'
                                 },
                                 {
                                 id: expect.any(Number),
@@ -52,7 +54,9 @@ describe('getCounts', function() {
                                 time: expect.any(String),
                                 timestamp: stamp2.toString(),
                                 note: null,
-                                userId: 'test2'
+                                userId: 'test2',
+                                firstName: 'Barb',
+                                lastName: 'Tasty'
                                 },
                                 {
                                 id: expect.any(Number),
@@ -61,7 +65,9 @@ describe('getCounts', function() {
                                 time: expect.any(String),
                                 timestamp: stamp1.toString(),
                                 note: 'testNote',
-                                userId: 'test1'}])
+                                userId: 'test1',
+                                firstName: 'Bob',
+                                lastName: 'Testy'}])
     });
 
     test('filters by date', async function() {
@@ -73,7 +79,9 @@ describe('getCounts', function() {
                                 time: expect.any(String),
                                 timestamp: stamp3.toString(),
                                 note: null,
-                                userId: 'test3'
+                                userId: 'test3',
+                                firstName: 'Bulb',
+                                lastName: 'Toasty'
                                 },
                                 {
                                 id: expect.any(Number),
@@ -82,7 +90,9 @@ describe('getCounts', function() {
                                 time: expect.any(String),
                                 timestamp: stamp2.toString(),
                                 note: null,
-                                userId: 'test2'
+                                userId: 'test2',
+                                firstName: 'Barb',
+                                lastName: 'Tasty'
                                 }])
     });
 });
