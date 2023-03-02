@@ -43,9 +43,6 @@ router.post('/:containerId/count', async function(req, res, next) {
         const data = req.body;
         const {userCompanyCode, superAdmin, active} = await User.get(data.userId);
         const {companyCode} = await Container.get(containerId);
-        console.log(companyCode)
-        console.log(userCompanyCode)
-        console.log(active)
         if (!(superAdmin || (active && (userCompanyCode === companyCode)))){
             throw new UnauthorizedError('User is not authorized to post at this company');
         };
