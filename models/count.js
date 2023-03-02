@@ -32,7 +32,6 @@ class Count {
         );
 
         const counts = result.rows;
-        if (!counts[0]) throw new BadRequestError('No counts match the given parameters');
         return counts;
     };
 
