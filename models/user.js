@@ -141,7 +141,10 @@ class User {
         const user = result.rows[0];
         if (!user) throw new NotFoundError(`No user with id: ${id}`);
 
-        if (user.adminCompanyCode) user.userCompanyCode = user.adminCompanyCode;
+        if (user.adminCompanyCode) {
+            user.userCompanyCode = user.adminCompanyCode;
+            user.active = true;
+        };
 
         return user;
     };
@@ -167,7 +170,10 @@ class User {
         );
         const users = result.rows;
         for (let user of users) {
-            if (user.adminCompanyCode) user.userCompanyCode = user.adminCompanyCode;
+            if (user.adminCompanyCode) {
+                user.userCompanyCode = user.adminCompanyCode;
+                user.active = true;
+            };
         };
 
         if (!users[0]) throw new NotFoundError("No users found");

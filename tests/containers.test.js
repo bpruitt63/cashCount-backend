@@ -100,4 +100,24 @@ describe('POST /:containerId/count', function() {
                                     userId: 'test3'
                                     }});
     });
+
+    test('works admin', async function(){
+        const containerId = (await request(app).get('/containers/testco/all')).body.containers[0].id;
+        const resp = await request(app)
+            .post(`/containers/${containerId}/count`)
+            .send({userId: 'test3',
+                    cash: 400.00,
+                    time,
+                    timestamp,
+                    note: null});
+        expect(resp.body).toEqual({count: {
+                                    id: expect.any(Number),
+                                    containerId,
+                                    cash: '400.00',
+                                    time: expect.any(String),
+                                    timestamp: timestamp.toString(),
+                                    note: null,
+                                    userId: 'test3'
+                                    }});
+    });
 });
