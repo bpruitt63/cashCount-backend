@@ -28,6 +28,22 @@ describe('create', function() {
                                     posThreshold: '2.50',
                                     negThreshold: '5.00'});
     });
+
+    test('fails no companyCode', async function() {
+        try {
+            await Container.create(newContainer);
+        } catch (err) {
+            expect(err instanceof BadRequestError).toBeTruthy();
+        };
+    });
+
+    test('fails bad companyCode', async function() {
+        try {
+            await Container.create({...newContainer, companyCode: 'nope'});
+        } catch (err) {
+            expect(err instanceof BadRequestError).toBeTruthy();
+        };
+    });
 });
 
 describe('get', function() {

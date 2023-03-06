@@ -7,6 +7,14 @@ class Container {
 
         const {name, companyCode, target, posThreshold, negThreshold} = data;
 
+        const company = await db.query(
+            `SELECT company_code FROM companies
+            WHERE company_code = $1`,
+            [companyCode]
+        );
+
+        if (!company.rows[0]) throw new BadRequestError('Company not found');
+
         const result = await db.query(
             `INSERT INTO containers 
                 (name, company_code, target, pos_threshold, neg_threshold)
