@@ -5,6 +5,8 @@ const Container = require('../models/container');
 const { createToken } = require("../helpers");
 
 
+let testContainerIds = [];
+
 async function commonBeforeAll() {
     await db.query("DELETE FROM users");
     await db.query("DELETE FROM companies");
@@ -53,14 +55,22 @@ async function commonBeforeAll() {
         active: false
     });
 
-    await Container.create({
-        name: 'testContainer',
+    const testContainer1 = (await Container.create({
+        name: 'testContainer1',
         companyCode: 'testco',
         target: 500.00,
         posThreshold: 5.00,
         negThreshold: 2.00
-    });
+    })).id;
 
+    const testContainer2 = (await Container.create({
+        name: 'testContainer2',
+        companyCode: 'testco',
+        target: 550.00,
+        posThreshold: 5.50,
+        negThreshold: 2.50
+    })).id;
+    testContainerIds.push(testContainer1, testContainer2);
 };
 
 async function commonBeforeEach() {
@@ -99,6 +109,7 @@ module.exports = {
     commonBeforeEach,
     commonAfterEach,
     commonAfterAll,
+    testContainerIds,
     bobToken,
     barbToken
 };
