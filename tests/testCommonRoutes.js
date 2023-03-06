@@ -49,7 +49,8 @@ async function commonBeforeAll() {
         lastName: "Touchy",
         superAdmin: false,
         userCompanyCode: 'testco',
-        password: 'password1'
+        password: 'password1',
+        active: false
     });
 
     await Container.create({

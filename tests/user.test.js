@@ -31,7 +31,8 @@ describe("login", function () {
             superAdmin: false,
             userCompanyCode: testCompanyCodes[0],
             adminCompanyCode: testCompanyCodes[0],
-            emailReceiver: true
+            emailReceiver: true,
+            active: true
         });
     });
 
@@ -80,7 +81,7 @@ describe("create", function () {
         id: 'test4',
         firstName: "Bub",
         lastName: "Tester",
-        superAdmin: false,
+        superAdmin: false
     };
 
     test("works", async function () {
@@ -135,7 +136,8 @@ describe("create", function () {
                                 userCompanyCode: testCompanyCodes[0],
                                 adminCompanyCode: testCompanyCodes[0],
                                 email: 'test4@test.com',
-                                emailReceiver: true });
+                                emailReceiver: true,
+                                active: true });
         const found = await db.query("SELECT * FROM users WHERE id = 'test4'");
         expect(found.rows.length).toEqual(1);
         expect(found.rows[0].super_admin).toEqual(false);
@@ -195,7 +197,7 @@ describe("get", function(){
                 email: "test2@test.com",
                 firstName: "Barb",
                 lastName: "Tasty",
-                active: null,
+                active: true,
                 superAdmin: false,
                 adminCompanyCode: testCompanyCodes[0],
                 userCompanyCode: testCompanyCodes[0],
@@ -222,7 +224,7 @@ describe("getAll", function(){
                 email: "test2@test.com",
                 firstName: "Barb",
                 lastName: "Tasty",
-                active: null,
+                active: true,
                 superAdmin: false,
                 adminCompanyCode: testCompanyCodes[0],
                 userCompanyCode: testCompanyCodes[0],

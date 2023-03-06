@@ -119,6 +119,21 @@ describe("POST /createAdmin", function(){
         expect(resp.statusCode).toEqual(400);
     });
 
+    test("fails company admin", async function(){
+        const resp = await request(app)
+            .post('/users/createAdmin')
+            .send({
+                id: 'new1',
+                email: 'new@test.com',
+                password: 'password',
+                firstName: 'New',
+                lastName: 'Name',
+                superAdmin: false
+            })
+            .set("authorization", `Bearer ${barbToken}`);
+        expect(resp.statusCode).toEqual(401);
+    });
+
     test("fails unauth", async function(){
         const resp = await request(app)
             .post('/users/createAdmin')
@@ -243,7 +258,8 @@ describe("POST /create/:companyCode", function(){
                                 emailReceiver: false,
                                 email: 'test5@test.com',
                                 userCompanyCode: 'testco',
-                                adminCompanyCode: 'testco'
+                                adminCompanyCode: 'testco',
+                                active: true
         }});
     });
 
@@ -320,7 +336,7 @@ describe("GET /:companyCode/:id", function() {
                                     superAdmin: false,
                                     adminCompanyCode: 'testco',
                                     userCompanyCode: 'testco',
-                                    active: null,
+                                    active: true,
                                     emailReceiver: true
             }});
     });
@@ -364,7 +380,7 @@ describe("GET /:companyCode", function() {
                 superAdmin: false,
                 userCompanyCode: 'testco',
                 adminCompanyCode: 'testco',
-                active: null,
+                active: true,
                 emailReceiver: true
             },
             {
@@ -386,7 +402,7 @@ describe("GET /:companyCode", function() {
                 superAdmin: false,
                 userCompanyCode: 'testco',
                 adminCompanyCode: null,
-                active: true,
+                active: false,
                 emailReceiver: null
             }
         ]});
@@ -405,7 +421,7 @@ describe("GET /:companyCode", function() {
                 superAdmin: false,
                 userCompanyCode: 'testco',
                 adminCompanyCode: 'testco',
-                active: null,
+                active: true,
                 emailReceiver: true
             },
             {
@@ -427,7 +443,7 @@ describe("GET /:companyCode", function() {
                 superAdmin: false,
                 userCompanyCode: 'testco',
                 adminCompanyCode: null,
-                active: true,
+                active: false,
                 emailReceiver: null
             }
         ]});

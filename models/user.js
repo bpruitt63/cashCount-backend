@@ -39,6 +39,7 @@ class User {
             user.adminCompanyCode = result.rows[0].companyCode;
             user.userCompanyCode = result.rows[0].companyCode;
             user.emailReceiver = result.rows[0].emailReceiver;
+            user.active = true;
         };
         
         if (user) {
@@ -103,6 +104,7 @@ class User {
             user.userCompanyCode = adminResult.rows[0].companyCode;
             user.adminCompanyCode = adminResult.rows[0].companyCode;
             user.emailReceiver = adminResult.rows[0].emailReceiver;
+            user.active = true;
 
         } else if (userCompanyCode) {
             const companyResult = await db.query(
