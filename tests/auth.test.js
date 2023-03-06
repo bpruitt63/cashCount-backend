@@ -3,7 +3,8 @@ const { UnauthorizedError } = require("../expressError");
 const { authenticateJWT, 
         ensureLoggedIn,
         ensureAdmin,
-        ensureCorrectUserOrAdmin } = require("../middleware/auth");
+        ensureCorrectUserOrAdmin,
+        ensureSuperAdmin } = require("../middleware/auth");
 
 
 const { SECRET_KEY } = require("../config");
@@ -176,5 +177,50 @@ describe("ensureCorrectUserOrAdmin", function () {
             expect(err instanceof UnauthorizedError).toBeTruthy();
         };
         ensureCorrectUserOrAdmin(req, res, next);
+    });
+});
+
+
+describe("ensureSuperAdmin", function () {
+    test("works", function () {
+        expect.assertions(1);
+        const req = {};
+        const res = { locals: { cashCountUser: { id: 'test',
+                                email: 'test@test.com',
+                                firstName: "Bob",
+                                lastName: "Testy",
+                                superAdmin: true }}};
+        const next = function (err) {
+            expect(err).toBeFalsy();
+        };
+        ensureSuperAdmin(req, res, next);
+    });
+  
+    test("unauth if not super admin", function () {
+        expect.assertions(1);
+        const req = { params: {companyCode: 'testco'} };
+        const res = { locals: { cashCountUser: { id: 'test',
+                                email: 'test@test.com',
+                                firstName: "Bob",
+                                lastName: "Testy",
+                                superAdmin: false,
+                                userCompanyCode: 'testco',
+                                adminCompanyCode: 'testco',
+                                emailReceiver: true,
+                                active: true }}};
+        const next = function (err) {
+            expect(err instanceof UnauthorizedError).toBeTruthy();
+        };
+        ensureSuperAdmin(req, res, next);
+    });
+  
+    test("unauth if anon", function () {
+        expect.assertions(1);
+        const req = {};
+        const res = { locals: {} };
+        const next = function (err) {
+            expect(err instanceof UnauthorizedError).toBeTruthy();
+        };
+        ensureSuperAdmin(req, res, next);
     });
 });
