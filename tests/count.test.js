@@ -1,5 +1,5 @@
-const Count = require('../models/count');
 const { BadRequestError } = require('../expressError');
+const Count = require('../models/count');
 const {
         commonBeforeAll,
         commonBeforeEach,
@@ -29,6 +29,24 @@ describe('addCount', function() {
                                 timestamp: timestamp.toString(),
                                 note: null,
                                 userId: 'test3'});
+    });
+
+    test('fails bad user', async function() {
+        try {
+            await Count.addCount({containerId: testContainerIds[0], userId: 'nope',
+                                    cash: 600, time, timestamp, note: null});
+        } catch (err) {
+            expect(err).toBeTruthy();
+        };
+    });
+
+    test('fails no user', async function() {
+        try {
+            await Count.addCount({containerId: testContainerIds[0],
+                                    cash: 600, time, timestamp, note: null});
+        } catch (err) {
+            expect(err instanceof BadRequestError).toBeTruthy();
+        };
     });
 });
 
