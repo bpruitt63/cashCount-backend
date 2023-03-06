@@ -17,6 +17,7 @@ async function commonBeforeAll() {
 
 
     await Company.create('testco');
+    await Company.create('otherTestco')
 
     await User.create({
         id: 'test1',
@@ -53,6 +54,14 @@ async function commonBeforeAll() {
         userCompanyCode: 'testco',
         password: 'password1',
         active: false
+    });
+    await User.create({
+        id: 'test5',
+        firstName: "Bib",
+        lastName: "Trappy",
+        superAdmin: false,
+        userCompanyCode: 'otherTestco',
+        active: true
     });
 
     const testContainer1 = (await Container.create({
