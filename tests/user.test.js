@@ -9,8 +9,7 @@ const {
         commonBeforeAll,
         commonBeforeEach,
         commonAfterEach,
-        commonAfterAll,
-        testCompanyCodes
+        commonAfterAll
     } = require("./testCommonModels");
 
 beforeAll(commonBeforeAll);
@@ -29,8 +28,8 @@ describe("login", function () {
             firstName: "Barb",
             lastName: "Tasty",
             superAdmin: false,
-            userCompanyCode: testCompanyCodes[0],
-            adminCompanyCode: testCompanyCodes[0],
+            userCompanyCode: 'testco',
+            adminCompanyCode: 'testco',
             emailReceiver: true,
             active: true
         });
@@ -112,10 +111,10 @@ describe("create", function () {
     test("works: adds company user", async function () {
         const user = await User.create({
             ...newUser,
-            userCompanyCode: testCompanyCodes[0]
+            userCompanyCode: 'testco'
         });
         expect(user).toEqual({ ...newUser, email: null,
-                                userCompanyCode: testCompanyCodes[0],
+                                userCompanyCode: 'testco',
                                 active: true });
         const found = await db.query("SELECT * FROM users WHERE id = 'test4'");
         expect(found.rows.length).toEqual(1);
@@ -129,12 +128,12 @@ describe("create", function () {
             companyAdmin: true,
             email: 'test4@test.com',
             password: 'password',
-            userCompanyCode: testCompanyCodes[0],
+            userCompanyCode: 'testco',
             emailReceiver: true
         });
         expect(user).toEqual({ ...newUser, 
-                                userCompanyCode: testCompanyCodes[0],
-                                adminCompanyCode: testCompanyCodes[0],
+                                userCompanyCode: 'testco',
+                                adminCompanyCode: 'testco',
                                 email: 'test4@test.com',
                                 emailReceiver: true,
                                 active: true });
@@ -184,7 +183,7 @@ describe("get", function(){
                 active: true,
                 superAdmin: false,
                 adminCompanyCode: null,
-                userCompanyCode: testCompanyCodes[0],
+                userCompanyCode: 'testco',
                 emailReceiver: null
             });
     });
@@ -199,8 +198,8 @@ describe("get", function(){
                 lastName: "Tasty",
                 active: true,
                 superAdmin: false,
-                adminCompanyCode: testCompanyCodes[0],
-                userCompanyCode: testCompanyCodes[0],
+                adminCompanyCode: 'testco',
+                userCompanyCode: 'testco',
                 emailReceiver: true
             });
     });
@@ -218,7 +217,7 @@ describe("get", function(){
 //Get all
 describe("getAll", function(){
     test("works", async function(){
-        const users = await User.getAll(testCompanyCodes[0]);
+        const users = await User.getAll('testco');
         expect(users).toEqual([{
                 id: 'test2',
                 email: "test2@test.com",
@@ -226,8 +225,8 @@ describe("getAll", function(){
                 lastName: "Tasty",
                 active: true,
                 superAdmin: false,
-                adminCompanyCode: testCompanyCodes[0],
-                userCompanyCode: testCompanyCodes[0],
+                adminCompanyCode: 'testco',
+                userCompanyCode: 'testco',
                 emailReceiver: true
         },
         {
@@ -238,7 +237,7 @@ describe("getAll", function(){
                 active: true,
                 superAdmin: false,
                 adminCompanyCode: null,
-                userCompanyCode: testCompanyCodes[0],
+                userCompanyCode: 'testco',
                 emailReceiver: null
         }]);
     });

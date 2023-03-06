@@ -3,7 +3,6 @@ const bcrypt = require("bcrypt");
 const db = require("../db.js");
 const { BCRYPT_WORK_FACTOR } = require("../config");
 
-let testCompanyCodes = [];
 let testContainerIds = [];
 
 const date1 = new Date('26 February 2023 13:00:00');
@@ -22,10 +21,9 @@ async function commonBeforeAll() {
     await db.query("DELETE FROM counts");
 
 
-    const company = await db.query(`INSERT INTO companies (company_code) 
+    await db.query(`INSERT INTO companies (company_code) 
                                     VALUES ('testco')
                                     RETURNING company_code`);
-    testCompanyCodes.splice(0, 0, ...company.rows.map(r => r.company_code));
 
     await db.query(`
     INSERT INTO users (id, email, password, first_name, last_name, super_admin)
@@ -51,16 +49,16 @@ async function commonBeforeAll() {
 
     await db.query(`
     INSERT INTO company_admins (user_id, company_code, email_receiver)
-    VALUES ('test2', $1, TRUE)`, [testCompanyCodes[0]]);
+    VALUES ('test2', 'testco', TRUE)`);
 
     await db.query(`
     INSERT INTO company_users (user_id, company_code, active)
-    VALUES ('test3', $1, TRUE)`, [testCompanyCodes[0]]);
+    VALUES ('test3', 'testco', TRUE)`);
 
     const resultContainers = await db.query(`
     INSERT INTO containers (name, company_code, target, pos_threshold, neg_threshold)
-    VALUES ('testContainer1', $1, 100.00, 5.00, 2.00),
-    ('testContainer2', $1, 150.00, 5.00, 2.25) RETURNING id`, [testCompanyCodes[0]]);
+    VALUES ('testContainer1', 'testco', 100.00, 5.00, 2.00),
+    ('testContainer2', 'testco', 150.00, 5.00, 2.25) RETURNING id`);
     testContainerIds.splice(0, 0, ...resultContainers.rows.map(r => r.id));
 
     await db.query(`
@@ -94,7 +92,6 @@ module.exports = {
     commonBeforeEach,
     commonAfterAll,
     commonAfterEach,
-    testCompanyCodes,
     testContainerIds,
     stamp1,
     stamp2,

@@ -5,7 +5,6 @@ const {
         commonBeforeEach,
         commonAfterEach,
         commonAfterAll,
-        testCompanyCodes,
         testContainerIds
     } = require("./testCommonModels");
 
@@ -21,10 +20,10 @@ describe('create', function() {
                         negThreshold: 5.00}
 
     test('works', async function() {
-        const container = await Container.create({...newContainer, companyCode: testCompanyCodes[0]});
+        const container = await Container.create({...newContainer, companyCode: 'testco'});
         expect(container).toEqual({ id: expect.any(Number),
                                     name: 'testContainer',
-                                    companyCode: testCompanyCodes[0],
+                                    companyCode: 'testco',
                                     target: '100.00',
                                     posThreshold: '2.50',
                                     negThreshold: '5.00'});
@@ -36,7 +35,7 @@ describe('get', function() {
         const container = await Container.get(testContainerIds[0]);
         expect(container).toEqual({ id: testContainerIds[0],
                                     name: 'testContainer1',
-                                    companyCode: testCompanyCodes[0],
+                                    companyCode: 'testco',
                                     target: '100.00',
                                     posThreshold: '5.00',
                                     negThreshold: '2.00'});
@@ -54,10 +53,10 @@ describe('get', function() {
 
 describe('getAll', function() {
     test('works', async function() {
-        const containers = await Container.getAll(testCompanyCodes[0]);
+        const containers = await Container.getAll('testco');
         expect(containers).toEqual([{ id: testContainerIds[0],
                                     name: 'testContainer1',
-                                    companyCode: testCompanyCodes[0],
+                                    companyCode: 'testco',
                                     target: '100.00',
                                     posThreshold: '5.00',
                                     negThreshold: '2.00'
@@ -65,7 +64,7 @@ describe('getAll', function() {
                                     { 
                                     id: testContainerIds[1],
                                     name: 'testContainer2',
-                                    companyCode: testCompanyCodes[0],
+                                    companyCode: 'testco',
                                     target: '150.00',
                                     posThreshold: '5.00',
                                     negThreshold: '2.25'}])
