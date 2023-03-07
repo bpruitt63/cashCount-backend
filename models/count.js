@@ -4,14 +4,14 @@ const { BadRequestError } = require('../expressError');
 class Count {
 
     static async addCount(data) {
-        const {containerId, cash, time, timestamp, notes, userId} = data;
+        const {containerId, cash, time, timestamp, note, userId} = data;
 
         const result = await db.query(
             `INSERT INTO counts (container_id, cash, time, timestamp, note, user_id)
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING id, container_id AS "containerId", cash,
                 time, timestamp, note, user_id AS "userId"`,
-            [containerId, cash, time, timestamp, notes, userId]
+            [containerId, cash, time, timestamp, note, userId]
         );
 
         const count = result.rows[0];
