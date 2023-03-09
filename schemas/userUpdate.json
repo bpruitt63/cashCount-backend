@@ -3,6 +3,12 @@
     "$id": "http://example.com/userUpdate.json",
     "type": "object",
     "properties": {
+        "email": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 60,
+            "format": "email"
+          },
         "password": {
             "type": "string",
             "minLength": 6,
@@ -21,7 +27,13 @@
         "active": {
             "type": "boolean"
         },
-        "admin": {
+        "superAdmin": {
+            "type": "boolean"
+        },
+        "companyAdmin": {
+            "type": "boolean"
+        },
+        "emailReceiver": {
             "type": "boolean"
         }
     },

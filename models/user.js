@@ -1,6 +1,6 @@
 const db = require("../db");
 const bcrypt = require("bcrypt");
-//const { sqlForPartialUpdate } = require("../helpers");
+const { sqlForPartialUpdate } = require("../helpers");
 const {
   NotFoundError,
   BadRequestError,
@@ -93,29 +93,20 @@ class User {
         const user = result.rows[0];
 
         if (companyAdmin) {
-            const adminResult = await db.query(
-                `INSERT INTO company_admins
-                        (user_id, company_code, email_receiver)
-                VALUES ($1, $2, $3)
-                RETURNING company_code AS "companyCode", email_receiver AS "emailReceiver"`,
-                [id, userCompanyCode, emailReceiver]
-            );
 
-            user.userCompanyCode = adminResult.rows[0].companyCode;
-            user.adminCompanyCode = adminResult.rows[0].companyCode;
-            user.emailReceiver = adminResult.rows[0].emailReceiver;
+            const adminResult = await this.addCompanyAdmin(id, userCompanyCode, emailReceiver);
+
+            user.userCompanyCode = adminResult.adminCompanyCode;
+            user.adminCompanyCode = adminResult.adminCompanyCode;
+            user.emailReceiver = adminResult.emailReceiver;
             user.active = true;
 
         } else if (userCompanyCode) {
-            const companyResult = await db.query(
-                `INSERT INTO company_users
-                        (user_id, company_code, active)
-                VALUES ($1, $2, $3)
-                RETURNING company_code AS "companyCode", active`,
-                [id, userCompanyCode, active]
-            );
-            user.userCompanyCode = companyResult.rows[0].companyCode;
-            user.active = companyResult.rows[0].active;
+
+            const companyResult = await this.addCompanyUser(id, userCompanyCode, active);
+
+            user.userCompanyCode = companyResult.userCompanyCode;
+            user.active = companyResult.active;
         };
 
         return user;
@@ -184,33 +175,86 @@ class User {
     };
 
 
-    // static async update(email, data) {
-    //     if (data.password) {
-    //         data.password = await bcrypt.hash(data.password, BCRYPT_WORK_FACTOR);
-    //     };
+    static async updateUserInfo(id, data) {
+        if (data.password) {
+            data.password = await bcrypt.hash(data.password, BCRYPT_WORK_FACTOR);
+        };
 
-    //     const { setCols, values } = sqlForPartialUpdate(
-    //         data,
-    //         {   firstName: "first_name",
-    //             lastName: "last_name"
-    //         });
-    //     const emailVarIdx = "$" + (values.length + 1);
+        const { setCols, values } = sqlForPartialUpdate(
+            data,
+            {   firstName: "first_name",
+                lastName: "last_name",
+                superAdmin: "super_admin"
+            });
+        const idVarIdx = "$" + (values.length + 1);
 
-    //     const querySql = `UPDATE users 
-    //                   SET ${setCols} 
-    //                   WHERE email = ${emailVarIdx} 
-    //                   RETURNING email,
-    //                             first_name AS "firstName",
-    //                             last_name AS "lastName",
-    //                             active,
-    //                             admin`;
-    //     const result = await db.query(querySql, [...values, email]);
-    //     const user = result.rows[0];
+        const querySql = `UPDATE users 
+                      SET ${setCols} 
+                      WHERE id = ${idVarIdx} 
+                      RETURNING id,
+                                email,
+                                first_name AS "firstName",
+                                last_name AS "lastName",
+                                super_admin AS "superAdmin"`;
+        const result = await db.query(querySql, [...values, id]);
+        const user = result.rows[0];
                             
-    //     if (!user) throw new NotFoundError(`No user with email: ${email}`);
+        if (!user) throw new NotFoundError(`No user with id: ${id}`);
                             
-    //     return user;
-    // };
+        return user;
+    };
+
+    static async addCompanyAdmin(id, companyCode, emailReceiver) {
+        
+        const result = await db.query(
+            `INSERT INTO company_admins
+                    (user_id, company_code, email_receiver)
+            VALUES ($1, $2, $3)
+            RETURNING user_id AS "id",
+                    company_code AS "adminCompanyCode", 
+                    email_receiver AS "emailReceiver"`,
+            [id, companyCode, emailReceiver]
+        );
+
+        const companyAdmin = result.rows[0];
+        if (!companyAdmin) throw new BadRequestError('Failed to add admin to company');
+
+        await db.query(
+            `DELETE FROM company_users
+            WHERE user_id = $1 AND company_code = $2`,
+            [id, companyCode]
+        );
+
+        return companyAdmin;
+    };
+
+    static async addCompanyUser(id, companyCode, active) {
+
+        const result = await db.query(
+            `INSERT INTO company_users
+                    (user_id, company_code, active)
+            VALUES ($1, $2, $3)
+            RETURNING user_id AS "id", company_code AS "userCompanyCode", active`,
+            [id, companyCode, active]
+        );
+
+        const companyUser = result.rows[0];
+        if (!companyUser) throw new BadRequestError('Failed to add user to company');
+
+        return companyUser;
+    };
+
+    static async removeCompanyAdmin(id, companyCode, active) {
+
+        await db.query(
+            `DELETE FROM company_admins
+            WHERE user_id = $1 AND company_code = $2`,
+            [id, companyCode]
+        );
+
+        const user = await this.addCompanyUser(id, companyCode, active);
+        return user;
+    };
 };
 
 module.exports = User;

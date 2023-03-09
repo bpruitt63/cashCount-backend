@@ -77,7 +77,7 @@ describe("login", function () {
 //Create
 describe("create", function () {
     const newUser = {
-        id: 'test4',
+        id: 'newb',
         firstName: "Bub",
         lastName: "Tester",
         superAdmin: false
@@ -86,7 +86,7 @@ describe("create", function () {
     test("works", async function () {
         let user = await User.create(newUser);
         expect(user).toEqual({...newUser, email: null});
-        const found = await db.query("SELECT * FROM users WHERE id = 'test4'");
+        const found = await db.query("SELECT * FROM users WHERE id = 'newb'");
         expect(found.rows.length).toEqual(1);
         expect(found.rows[0].super_admin).toEqual(false);
         expect(found.rows[0].password).toBeNull();
@@ -102,7 +102,7 @@ describe("create", function () {
         expect(user).toEqual({ ...newUser, 
                                 superAdmin: true,
                                 email: 'test4@test.com' });
-        const found = await db.query("SELECT * FROM users WHERE id = 'test4'");
+        const found = await db.query("SELECT * FROM users WHERE id = 'newb'");
         expect(found.rows.length).toEqual(1);
         expect(found.rows[0].super_admin).toEqual(true);
         expect(found.rows[0].password.startsWith("$2b$")).toEqual(true);
@@ -116,7 +116,7 @@ describe("create", function () {
         expect(user).toEqual({ ...newUser, email: null,
                                 userCompanyCode: 'testco',
                                 active: true });
-        const found = await db.query("SELECT * FROM users WHERE id = 'test4'");
+        const found = await db.query("SELECT * FROM users WHERE id = 'newb'");
         expect(found.rows.length).toEqual(1);
         expect(found.rows[0].super_admin).toEqual(false);
         expect(found.rows[0].password).toBeNull();
@@ -137,7 +137,7 @@ describe("create", function () {
                                 email: 'test4@test.com',
                                 emailReceiver: true,
                                 active: true });
-        const found = await db.query("SELECT * FROM users WHERE id = 'test4'");
+        const found = await db.query("SELECT * FROM users WHERE id = 'newb'");
         expect(found.rows.length).toEqual(1);
         expect(found.rows[0].super_admin).toEqual(false);
         expect(found.rows[0].password.startsWith("$2b$")).toEqual(true);
@@ -243,61 +243,149 @@ describe("getAll", function(){
     });
 });
 
-// //Update
-// describe("update", function () {
-//     const updateData = {
-//         email: "new@test.com",
-//         firstName: "NewF",
-//         lastName: "NewL",
-//         active: true,
-//         admin: false
-//     };
+//Update
+describe("updateUserInfo", function () {
+    const updateData = {
+        email: "new@test.com",
+        firstName: "NewF",
+        lastName: "NewL",
+        superAdmin: false
+    };
 
-//     test("works", async function () {
-//         const user = await User.update("test1@test.com", updateData);
-//         expect(user).toEqual({
-//             email: "new@test.com",
-//             firstName: "NewF",
-//             lastName: "NewL",
-//             active: true,
-//             admin: false
-//         });
-//     });
+    test("works", async function () {
+        const user = await User.updateUserInfo("test4", updateData);
+        expect(user).toEqual({
+            id: 'test4',
+            email: "new@test.com",
+            firstName: "NewF",
+            lastName: "NewL",
+            superAdmin: false
+        });
+    });
 
-//     test("works: set password", async function () {
-//         const user = await User.update("test1@test.com", {
-//             password: "newnew",
-//         });
-//         expect(user).toEqual({
-//             email: "test1@test.com",
-//             firstName: "Bob",
-//             lastName: "Testy",
-//             active: true,
-//             admin: true
-//         });
-//         const found = await db.query("SELECT * FROM users WHERE email = 'test1@test.com'");
-//         expect(found.rows.length).toEqual(1);
-//         expect(found.rows[0].password.startsWith("$2b$")).toEqual(true);
-//     });
+    test("works: set password", async function () {
+        const user = await User.updateUserInfo("test4", {
+            password: "newnew",
+        });
+        expect(user).toEqual({
+            id: 'test4',
+            email: null,
+            firstName: "Bib",
+            lastName: "Tippy",
+            superAdmin: false
+        });
+        const found = await db.query("SELECT * FROM users WHERE id = 'test4'");
+        expect(found.rows.length).toEqual(1);
+        expect(found.rows[0].password.startsWith("$2b$")).toEqual(true);
+    });
 
-//     test("not found if no such user", async function () {
-//         try {
-//             await User.update("nope", {
-//             firstName: "test",
-//             });
-//             fail();
-//         } catch (err) {
-//             expect(err instanceof NotFoundError).toBeTruthy();
-//         }
-//     });
+    test("not found if no such user", async function () {
+        try {
+            await User.updateUserInfo("nope", {
+            firstName: "test",
+            });
+            fail();
+        } catch (err) {
+            expect(err instanceof NotFoundError).toBeTruthy();
+        }
+    });
 
-//     test("bad request if no data", async function () {
-//         expect.assertions(1);
-//         try {
-//             await User.update("test1@test.com", {});
-//             fail();
-//         } catch (err) {
-//             expect(err instanceof BadRequestError).toBeTruthy();
-//         };
-//     });
-// });
+    test("bad request if no data", async function () {
+        expect.assertions(1);
+        try {
+            await User.updateUserInfo("test4", {});
+            fail();
+        } catch (err) {
+            expect(err instanceof BadRequestError).toBeTruthy();
+        };
+    });
+});
+
+
+//add company admin
+describe('addCompanyadmin', function() {
+    test('works', async function() {
+        const newAdmin = await User.addCompanyAdmin('test3', 'testco', true);
+        expect(newAdmin).toEqual({id: 'test3',
+                                adminCompanyCode: 'testco',
+                                emailReceiver: true});
+    });
+
+    test('removes user from company_users', async function() {
+        await User.addCompanyAdmin('test3', 'testco', true);
+        const users = await db.query(`SELECT * from company_users WHERE 
+                        user_id = 'test3' AND company_code = 'testco'`);
+        expect(users.rows.length).toEqual(0);
+    });
+
+    test('fails fake user', async function() {
+        try {
+            await User.addCompanyAdmin('nope', 'testco', true);
+            fail();
+        } catch (err) {
+            expect(err).toBeTruthy();
+        };
+    });
+
+    test('fails bad company', async function() {
+        try {
+            await User.addCompanyAdmin('test3', 'nope', true);
+            fail();
+        } catch (err) {
+            expect(err).toBeTruthy();
+        };
+    });
+});
+
+
+//add company user
+describe('addCompanyUser', function() {
+    test('works', async function() {
+        const newUser = await User.addCompanyUser('test4', 'testco', true);
+        expect(newUser).toEqual({id: 'test4',
+                                userCompanyCode: 'testco',
+                                active: true});
+    });
+    
+    test('fails fake user', async function() {
+        try {
+            await User.addCompanyUser('nope', 'testco', true);
+            fail();
+        } catch (err) {
+            expect(err).toBeTruthy();
+        };
+    });
+
+    test('fails bad company', async function() {
+        try {
+            await User.addCompanyUser('test3', 'nope', true);
+            fail();
+        } catch (err) {
+            expect(err).toBeTruthy();
+        };
+    });
+});
+
+//remove company admin
+describe('removeCompanyAdmin', function() {
+    test('works user is added to company_users', async function() {
+        const removed = await User.removeCompanyAdmin('test2', 'testco', true);
+        expect(removed).toEqual({id: 'test2',
+                                userCompanyCode: 'testco',
+                                active: true});
+    });
+
+    test('works user is removed from company_admins', async function() {
+        await User.removeCompanyAdmin('test2', 'testco', true);
+        const user = await User.get('test2');
+        expect(user).toEqual({id: 'test2',
+                            email: "test2@test.com",
+                            firstName: "Barb",
+                            lastName: "Tasty",
+                            active: true,
+                            superAdmin: false,
+                            adminCompanyCode: null,
+                            userCompanyCode: 'testco',
+                            emailReceiver: null})
+    });
+});

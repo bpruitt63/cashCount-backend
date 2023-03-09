@@ -44,6 +44,12 @@ async function commonBeforeAll() {
             null,
             'Bulb',
             'Toasty',
+            FALSE),
+            ('test4',
+            null,
+            null,
+            'Bib',
+            'Tippy',
             FALSE)`,
             [await bcrypt.hash("password", BCRYPT_WORK_FACTOR)]);
 
