@@ -287,6 +287,17 @@ class User {
         if (!updated) throw new BadRequestError('Failed to update user');
         return updated;
     };
+
+    static async hasPassword(id) {
+
+        const results = await db.query(
+            `SELECT password FROM users
+            WHERE id = $1`,
+            [id]
+        );
+        const password = results.rows[0];
+        return password ? true : false;
+    };
 };
 
 module.exports = User;

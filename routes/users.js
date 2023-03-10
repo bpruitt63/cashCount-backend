@@ -4,11 +4,11 @@ const User = require('../models/user');
 const loginSchema = require('../schemas/loginSchema.json');
 const adminNewSchema = require('../schemas/adminNew.json');
 const userNewSchema = require('../schemas/userNew.json');
+const adminUpdateSchema = require('../schemas/adminUpdate.json');
 const userUpdateSchema = require('../schemas/userUpdate.json');
 const { BadRequestError } = require("../expressError");
 const { createToken } = require("../helpers");
 const { ensureAdmin,
-        ensureCorrectUserOrAdmin,
         ensureSuperAdmin } = require("../middleware/auth");
 
 const router = new express.Router();
@@ -73,33 +73,93 @@ router.post('/create/:companyCode', ensureAdmin, async function(req, res, next){
 });
 
 
-// router.patch('/:email', ensureCorrectUserOrAdmin, async function(req, res, next){
-//     try {
-//         const validator = jsonschema.validate(req.body, userUpdateSchema);
-//         if (!validator.valid) {
-//             const errs = validator.errors.map(e => e.stack);
-//             throw new BadRequestError(errs);
-//         };
-//         if (req.body.admin && !res.locals.user.admin) {
-//             throw new UnauthorizedError("Only admins can grant admin permissions");
-//         };
-//         if (req.body.active && !res.locals.user.active) {
-//             throw new UnauthorizedError("Only admins can make users active");
-//         };
-//         let user = await User.update(req.params.email, req.body);
+// Update super admin
+router.patch('/:id', ensureSuperAdmin, async function(req, res, next){
+    try {
+        const validator = jsonschema.validate(req.body, adminUpdateSchema);
+        if (!validator.valid) {
+            const errs = validator.errors.map(e => e.stack);
+            throw new BadRequestError(errs);
+        };
 
-//         let token;
+        const user = await User.updateUserInfo(req.params.id, req.body);
 
-//         //Update token if user is editing self
-//         if (res.locals.user.email === req.params.email) {
-//             user = await User.get(user.email);
-//             token = createToken(user);
-//         };
-//         return res.json({user, token});
-//     } catch(err) {
-//         return next(err);
-//     };
-// });
+        let token;
+
+        //Update token if user is editing self
+        if (res.locals.cashCountUser.id === req.params.id) {
+            token = createToken(user);
+        };
+        return res.json({user, token});
+    } catch(err) {
+        return next(err);
+    };
+});
+
+
+// Update company level user or admin
+router.patch('/:id/company/:companyCode', ensureAdmin, async function(req, res, next){
+    try {
+        const validator = jsonschema.validate(req.body, userUpdateSchema);
+        if (!validator.valid) {
+            const errs = validator.errors.map(e => e.stack);
+            throw new BadRequestError(errs);
+        };
+
+        const {id, companyCode} = req.params;
+
+        const userPrevData = await User.get(id);
+        const superAdmin = userPrevData.superAdmin;
+
+        const {email, firstName, lastName, password, companyAdmin} = req.body;
+        let {emailReceiver, active} = req.body;
+
+        const userData = {email, password, firstName, lastName, superAdmin};
+        for (let key of Object.keys(userData)) {
+            if (userData[key] === undefined) delete userData[key];
+        };
+
+        const user = await User.updateUserInfo(id, userData);
+
+        if (active === undefined) {
+            active = 'active' in userPrevData ? userPrevData.active : true;
+        };
+        if (emailReceiver === undefined) {
+            emailReceiver = 'emailReceiver' in userPrevData ? userPrevData.emailReceiver : false;
+        };
+
+        if (companyAdmin) {
+            const hasPassword = await User.hasPassword(id);
+            if (!user.email || !hasPassword) {
+                throw new BadRequestError('Email and password are required for admin');
+            };
+            if (emailReceiver === null) emailReceiver = false;
+            let admin;
+            if (userPrevData.adminCompanyCode) {
+                admin = await User.updateCompanyAdmin(id, companyCode, emailReceiver);
+            } else {
+                admin = await User.addCompanyAdmin(id, companyCode, emailReceiver);
+            };
+            user.userCompanyCode = admin.adminCompanyCode;
+            user.adminCompanyCode = admin.adminCompanyCode;
+            user.emailReceiver = admin.emailReceiver;
+            user.active = true;
+        } else {
+            let companyUser;
+            if (userPrevData.adminCompanyCode) {
+                companyUser = await User.removeCompanyAdmin(id, companyCode, active);
+            } else {
+                companyUser = await User.updateCompanyUser(id, companyCode, active);
+            };
+            user.userCompanyCode = companyUser.userCompanyCode;
+            user.active = companyUser.active;
+        };
+
+        return res.json({user});
+    } catch(err) {
+        return next(err);
+    };
+});
 
 
 router.get('/:companyCode/:id', ensureAdmin, async function(req, res, next){

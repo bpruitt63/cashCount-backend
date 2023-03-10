@@ -323,6 +323,196 @@ describe("POST /create/:companyCode", function(){
 });
 
 
+describe('PATCH /:id', function() {
+    test('works', async function() {
+        const resp = await request(app)
+            .patch('/users/test1')
+            .send({firstName: 'new'})
+            .set("authorization", `Bearer ${bobToken}`);
+        expect(resp.body).toEqual({user: {
+                                        id: 'test1',
+                                        firstName: 'new',
+                                        lastName: 'Testy',
+                                        email: 'test1@test.com',
+                                        superAdmin: true
+                                        },
+                                    token: expect.any(String)});
+    });
+
+    test('creates super admin', async function() {
+        const resp = await request(app)
+            .patch('/users/test2')
+            .send({superAdmin: true})
+            .set("authorization", `Bearer ${bobToken}`);
+        expect(resp.body).toEqual({user: {
+                                    id: 'test2',
+                                    firstName: 'Barb',
+                                    lastName: 'Tasty',
+                                    email: 'test2@test.com',
+                                    superAdmin: true
+                                    }});
+    });
+
+    test('fails if not super admin', async function() {
+        const resp = await request(app)
+            .patch('/users/test1')
+            .send({firstName: 'new'})
+            .set("authorization", `Bearer ${barbToken}`);
+        expect(resp.statusCode).toEqual(401);
+    });
+});
+
+
+describe('PATCH /:id/company/:companyCode', function() {
+    test('works company user', async function() {
+        const resp = await request(app)
+            .patch('/users/test3/company/testco')
+            .send({firstName: 'new',
+                    companyAdmin: false})
+            .set("authorization", `Bearer ${barbToken}`);
+        expect(resp.body).toEqual({user: {
+                                    id: 'test3',
+                                    firstName: 'new',
+                                    lastName: 'Toasty',
+                                    email: null,
+                                    superAdmin: false,
+                                    userCompanyCode: 'testco',
+                                    active: true
+                                    }});
+    });
+
+    test('works company admin', async function() {
+        const resp = await request(app)
+            .patch('/users/test2/company/testco')
+            .send({firstName: 'new',
+                    companyAdmin: true})
+            .set("authorization", `Bearer ${barbToken}`);
+        expect(resp.body).toEqual({user: {
+                                    id: 'test2',
+                                    firstName: 'new',
+                                    lastName: 'Tasty',
+                                    email: 'test2@test.com',
+                                    superAdmin: false,
+                                    userCompanyCode: 'testco',
+                                    adminCompanyCode: 'testco',
+                                    active: true,
+                                    emailReceiver: true
+                                    }});
+    });
+
+    test('works updates active', async function() {
+        const resp = await request(app)
+            .patch('/users/test3/company/testco')
+            .send({active: false,
+                    companyAdmin: false})
+            .set("authorization", `Bearer ${barbToken}`);
+        expect(resp.body).toEqual({user: {
+                                    id: 'test3',
+                                    firstName: 'Bulb',
+                                    lastName: 'Toasty',
+                                    email: null,
+                                    superAdmin: false,
+                                    userCompanyCode: 'testco',
+                                    active: false
+                                    }});
+    });
+
+    test('works updates emailReceiver', async function() {
+        const resp = await request(app)
+            .patch('/users/test2/company/testco')
+            .send({emailReceiver: false,
+                    companyAdmin: true})
+            .set("authorization", `Bearer ${barbToken}`);
+        expect(resp.body).toEqual({user: {
+                                    id: 'test2',
+                                    firstName: 'Barb',
+                                    lastName: 'Tasty',
+                                    email: 'test2@test.com',
+                                    superAdmin: false,
+                                    userCompanyCode: 'testco',
+                                    adminCompanyCode: 'testco',
+                                    active: true,
+                                    emailReceiver: false
+                                    }});
+    });
+
+    test('works changes user to admin', async function() {
+        const resp = await request(app)
+            .patch('/users/test3/company/testco')
+            .send({companyAdmin: true,
+                    email: 'new@test.com',
+                    password: 'password'})
+            .set("authorization", `Bearer ${barbToken}`);
+        expect(resp.body).toEqual({user: {
+                                    id: 'test3',
+                                    firstName: 'Bulb',
+                                    lastName: 'Toasty',
+                                    email: 'new@test.com',
+                                    superAdmin: false,
+                                    userCompanyCode: 'testco',
+                                    adminCompanyCode: 'testco',
+                                    active: true,
+                                    emailReceiver: false
+                                    }});
+    });
+
+    test('super admin can access', async function() {
+        const resp = await request(app)
+            .patch('/users/test3/company/testco')
+            .send({companyAdmin: true,
+                    email: 'new@test.com',
+                    password: 'password'})
+            .set("authorization", `Bearer ${bobToken}`);
+        expect(resp.body).toEqual({user: {
+                                    id: 'test3',
+                                    firstName: 'Bulb',
+                                    lastName: 'Toasty',
+                                    email: 'new@test.com',
+                                    superAdmin: false,
+                                    userCompanyCode: 'testco',
+                                    adminCompanyCode: 'testco',
+                                    active: true,
+                                    emailReceiver: false
+                                    }});
+    });
+
+    test('works changes admin to user', async function() {
+        const resp = await request(app)
+            .patch('/users/test2/company/testco')
+            .send({companyAdmin: false})
+            .set("authorization", `Bearer ${bobToken}`);
+        expect(resp.body).toEqual({user: {
+                                    id: 'test2',
+                                    firstName: 'Barb',
+                                    lastName: 'Tasty',
+                                    email: 'test2@test.com',
+                                    superAdmin: false,
+                                    userCompanyCode: 'testco',
+                                    active: true
+                                    }});
+    });
+
+    test("doesn't add super admin", async function() {
+        const resp = await request(app)
+            .patch('/users/test2/company/testco')
+            .send({superAdmin: true,
+                    companyAdmin: true})
+            .set("authorization", `Bearer ${barbToken}`);
+        expect(resp.body).toEqual({user: {
+                                    id: 'test2',
+                                    firstName: 'Barb',
+                                    lastName: 'Tasty',
+                                    email: 'test2@test.com',
+                                    superAdmin: false,
+                                    userCompanyCode: 'testco',
+                                    adminCompanyCode: 'testco',
+                                    active: true,
+                                    emailReceiver: true
+                                    }});
+    });
+});
+
+
 describe("GET /:companyCode/:id", function() {
     test("works super admin", async function(){
         const resp = await request(app)
