@@ -255,6 +255,38 @@ class User {
         const user = await this.addCompanyUser(id, companyCode, active);
         return user;
     };
+
+    static async updateCompanyAdmin(id, companyCode, emailReceiver) {
+
+        const results = await db.query(
+            `UPDATE company_admins
+            SET email_receiver = $1
+            WHERE user_id = $2 AND company_code = $3
+            RETURNING user_id AS "id", email_receiver AS "emailReceiver",
+            company_code AS "adminCompanyCode"`,
+            [emailReceiver, id, companyCode]
+        );
+
+        const updated = results.rows[0];
+        if (!updated) throw new BadRequestError('Failed to update user');
+        return updated;
+    };
+
+    static async updateCompanyUser(id, companyCode, active) {
+
+        const results = await db.query(
+            `UPDATE company_users
+            SET active = $1
+            WHERE user_id = $2 AND company_code = $3
+            RETURNING user_id AS "id", active,
+            company_code AS "userCompanyCode"`,
+            [active, id, companyCode]
+        );
+
+        const updated = results.rows[0];
+        if (!updated) throw new BadRequestError('Failed to update user');
+        return updated;
+    };
 };
 
 module.exports = User;

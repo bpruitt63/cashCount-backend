@@ -389,3 +389,41 @@ describe('removeCompanyAdmin', function() {
                             emailReceiver: null})
     });
 });
+
+//update company admin
+describe('updateCompanyAdmin', function() {
+    test('works', async function() {
+        const user = await User.updateCompanyAdmin('test2', 'testco', false);
+        expect(user).toEqual({id: 'test2',
+                            adminCompanyCode: 'testco',
+                            emailReceiver: false});
+    });
+
+    test('fails if user is not already admin', async function() {
+        try {
+            await User.updateCompanyAdmin('test3', 'testco', false);
+            fail();
+        } catch (err) {
+            expect(err instanceof BadRequestError).toBeTruthy();
+        };
+    });
+});
+
+//update company user
+describe('updateCompanyUser', function() {
+    test('works', async function() {
+        const user = await User.updateCompanyUser('test3', 'testco', false);
+        expect(user).toEqual({id: 'test3',
+                            userCompanyCode: 'testco',
+                            active: false});
+    });
+
+    test('fails if user is not already admin', async function() {
+        try {
+            await User.updateCompanyUser('test2', 'testco', false);
+            fail();
+        } catch (err) {
+            expect(err instanceof BadRequestError).toBeTruthy();
+        };
+    });
+});
