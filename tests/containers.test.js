@@ -200,3 +200,64 @@ describe('POST /:containerId/count', function() {
         expect(resp.statusCode).toEqual(401);
     });
 });
+
+
+describe('PATCH /containers/:containerId/company/:companyCode', function() {
+    test('works', async function() {
+        const resp = await request(app)
+            .patch(`/containers/${testContainerIds[0]}/company/testco`)
+            .send({name: 'new'})
+            .set("authorization", `Bearer ${barbToken}`);
+        expect(resp.body).toEqual({container:
+                                    {id: testContainerIds[0],
+                                    companyCode: 'testco',
+                                    name: "new",
+                                    target: '500.00',
+                                    posThreshold: '5.00',
+                                    negThreshold: '2.00'}});
+    });
+
+    test('works super admin', async function() {
+        const resp = await request(app)
+            .patch(`/containers/${testContainerIds[0]}/company/testco`)
+            .send({name: 'new'})
+            .set("authorization", `Bearer ${bobToken}`);
+        expect(resp.body).toEqual({container:
+                                    {id: testContainerIds[0],
+                                    companyCode: 'testco',
+                                    name: "new",
+                                    target: '500.00',
+                                    posThreshold: '5.00',
+                                    negThreshold: '2.00'}});
+    });
+
+    test('updates number fields', async function() {
+        const resp = await request(app)
+            .patch(`/containers/${testContainerIds[0]}/company/testco`)
+            .send({target: 550.50})
+            .set("authorization", `Bearer ${barbToken}`);
+        expect(resp.body).toEqual({container:
+                                    {id: testContainerIds[0],
+                                    companyCode: 'testco',
+                                    name: "testContainer1",
+                                    target: '550.50',
+                                    posThreshold: '5.00',
+                                    negThreshold: '2.00'}});
+    });
+
+    test('fails wrong data type', async function() {
+        const resp = await request(app)
+            .patch(`/containers/${testContainerIds[0]}/company/testco`)
+            .send({target: '550.50'})
+            .set("authorization", `Bearer ${barbToken}`);
+        expect(resp.statusCode).toEqual(400);
+    });
+
+    test('fails wrong company', async function() {
+        const resp = await request(app)
+            .patch(`/containers/${testContainerIds[2]}/company/testco`)
+            .send({name: 'new'})
+            .set("authorization", `Bearer ${barbToken}`);
+        expect(resp.statusCode).toEqual(401);
+    });
+});

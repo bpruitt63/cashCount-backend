@@ -1,5 +1,5 @@
 const Container = require('../models/container');
-const { BadRequestError } = require('../expressError');
+const { BadRequestError, NotFoundError } = require('../expressError');
 const {
         commonBeforeAll,
         commonBeforeEach,
@@ -92,6 +92,56 @@ describe('getAll', function() {
             fail();
         } catch (err) {
             expect(err instanceof BadRequestError).toBeTruthy();
+        };
+    });
+});
+
+
+describe('update', function() {
+    test('works', async function() {
+        const container = await Container.update(testContainerIds[0], {name: 'new'});
+        expect(container).toEqual({id: testContainerIds[0],
+                                    name: 'new',
+                                    companyCode: 'testco',
+                                    target: '100.00',
+                                    posThreshold: '5.00',
+                                    negThreshold: '2.00'});
+    });
+
+    test('updates numbers', async function() {
+        const container = await Container.update(testContainerIds[0], {target: 120.50});
+        expect(container).toEqual({id: testContainerIds[0],
+                                    name: 'testContainer1',
+                                    companyCode: 'testco',
+                                    target: '120.50',
+                                    posThreshold: '5.00',
+                                    negThreshold: '2.00'});
+    });
+
+    test('fails no data', async function() {
+        try {
+            await Container.update(testContainerIds[0], {});
+            fail();
+        } catch (err) {
+            expect(err instanceof BadRequestError).toBeTruthy();
+        };
+    });
+
+    test('fails bad container', async function() {
+        try {
+            await Container.update(-1, {name: 'new'});
+            fail();
+        } catch (err) {
+            expect(err instanceof NotFoundError).toBeTruthy();
+        };
+    });
+
+    test('fails wrong data type', async function() {
+        try {
+            await Container.update(testContainerIds[0], {target: 'new'});
+            fail();
+        } catch (err) {
+            expect(err).toBeTruthy();
         };
     });
 });

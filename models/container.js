@@ -1,5 +1,6 @@
 const db = require('../db');
-const { BadRequestError } = require('../expressError');
+const { sqlForPartialUpdate } = require("../helpers");
+const { BadRequestError, NotFoundError } = require('../expressError');
 
 class Container {
 
@@ -48,6 +49,32 @@ class Container {
         if (!containers[0]) throw new BadRequestError('No containers found');
 
         return containers;
+    };
+
+    static async update(id, data) {
+        const { setCols, values } = sqlForPartialUpdate(
+            data,
+            {   posThreshold: "pos_threshold",
+                negThreshold: "neg_threshold"
+            });
+        const idVarIdx = "$" + (values.length + 1);
+
+        const querySql = `UPDATE containers 
+                        SET ${setCols} 
+                        WHERE id = ${idVarIdx} 
+                        RETURNING id,
+                                    name,
+                                    target,
+                                    company_code AS "companyCode",
+                                    pos_threshold AS "posThreshold",
+                                    neg_threshold AS "negThreshold"`;
+
+        const result = await db.query(querySql, [...values, id]);
+        const container = result.rows[0];
+              
+        if (!container) throw new NotFoundError(`Container not found`);
+                            
+        return container;
     };
 };
 

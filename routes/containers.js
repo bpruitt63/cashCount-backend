@@ -4,6 +4,7 @@ const Container = require('../models/container');
 const Count = require('../models/count');
 const User = require('../models/user');
 const containerNewSchema = require('../schemas/containerNew.json');
+const containerUpdateSchema = require('../schemas/containerUpdate.json');
 const countSchema = require('../schemas/countSchema.json');
 const { BadRequestError, UnauthorizedError } = require('../expressError');
 const { ensureAdmin } = require("../middleware/auth");
@@ -70,7 +71,27 @@ router.get('/:containerId/counts', async function(req, res, next) {
     } catch(err) {
         return next(err);
     };
-})
+});
+
+router.patch('/:containerId/company/:companyCode', ensureAdmin, async function(req, res, next) {
+    try {
+        const validator = jsonschema.validate(req.body, containerUpdateSchema);
+        if (!validator.valid) {
+            const errs = validator.errors.map(e => e.stack);
+            throw new BadRequestError(errs);
+        };
+
+        const containerCompany = (await Container.get(req.params.containerId)).companyCode;
+        if (req.params.companyCode !== containerCompany) {
+            throw new UnauthorizedError('Container does not belong to this company');
+        };
+
+        const container = await Container.update(req.params.containerId, req.body);
+        return res.json({container});
+    } catch(err) {
+        return next(err);
+    };
+});
 
 
 module.exports = router;

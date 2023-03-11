@@ -79,7 +79,15 @@ async function commonBeforeAll() {
         posThreshold: 5.50,
         negThreshold: 2.50
     })).id;
-    testContainerIds.push(testContainer1, testContainer2);
+
+    const testContainer3 = (await Container.create({
+        name: 'testContainer3',
+        companyCode: 'otherTestco',
+        target: 550.00,
+        posThreshold: 5.50,
+        negThreshold: 2.50
+    })).id;
+    testContainerIds.push(testContainer1, testContainer2, testContainer3);
 };
 
 async function commonBeforeEach() {
