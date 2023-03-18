@@ -108,8 +108,9 @@ describe('GET /containers/:companyCode/all', function(){
 
 
 describe('POST /:containerId/count', function() {
-    const time = new Date();
-    const timestamp = time.getTime();
+    const date = new Date();
+    const time = date.toString();
+    const timestamp = date.getTime();
     test('works', async function(){
         const resp = await request(app)
             .post(`/containers/${testContainerIds[0]}/count`)
