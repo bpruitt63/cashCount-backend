@@ -8,6 +8,7 @@ const containerUpdateSchema = require('../schemas/containerUpdate.json');
 const countSchema = require('../schemas/countSchema.json');
 const { BadRequestError, UnauthorizedError } = require('../expressError');
 const { ensureAdmin } = require("../middleware/auth");
+const sendVarianceEmail = require('../email.js');
 
 
 const router = new express.Router();
@@ -42,8 +43,10 @@ router.post('/:containerId/count', async function(req, res, next) {
     try {
         const {containerId} = req.params;
         const data = req.body;
-        const {userCompanyCode, superAdmin, active} = await User.get(data.userId);
-        const {companyCode} = await Container.get(containerId);
+        const {userCompanyCode, superAdmin, active,
+                firstName, lastName} = await User.get(data.userId);
+        const {companyCode, target, name,
+                posThreshold, negThreshold} = await Container.get(containerId);
         if (!(superAdmin || (active && (userCompanyCode === companyCode)))){
             throw new UnauthorizedError('User is not authorized to post at this company');
         };
@@ -55,6 +58,16 @@ router.post('/:containerId/count', async function(req, res, next) {
         };
 
         const count = await Count.addCount({...data, containerId});
+
+        let variance = req.body.cash - target;
+        if (variance >= posThreshold || variance <= negThreshold) {
+            variance = (Math.round(variance * 100) / 100).toFixed(2);
+            const emailData = {target, posThreshold, negThreshold, variance,
+                                countData: req.body, containerName: name,
+                                userName: `${firstName} ${lastName}`};
+            await sendVarianceEmail(variance, companyCode, emailData);
+        };
+
         return res.json({count});
     } catch(err) {
         return next(err);
