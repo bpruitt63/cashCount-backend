@@ -20,8 +20,8 @@ const createMsg = (recipient, data, variance) => {
                     ${data.userName} reported a
                         variance of $${variance} in ${data.containerName} 
                         at ${time}.<br/>
-                    Target: ${data.target}<br/>
-                    Count: ${data.countData.cash}<br/>
+                    Target: $${data.target}<br/>
+                    Count: $${data.countData.cash.toFixed(2)}<br/>
                     Notes: ${data.countData.note || 'none'}
                 </p>`
     };
