@@ -1,9 +1,9 @@
 const sgMail = require('@sendgrid/mail');
-const SENDGRID_API_KEY = require('./apiKey');
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY || require('./apiKey');
 const User = require('./models/user');
 const {formatTime} = require('./helpers');
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY || SENDGRID_API_KEY);
+sgMail.setApiKey(SENDGRID_API_KEY);
 
 const createMsg = (recipient, data, variance) => {
     let subject;
