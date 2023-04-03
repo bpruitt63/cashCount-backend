@@ -38,7 +38,6 @@ function formatCompany(companyData) {
 };
 
 function formatTime(time){
-    console.log(time)
     time = time.split(' ');
     let ampm = 'am';
     let readableTime = time[4];

@@ -59,8 +59,8 @@ router.post('/:containerId/count', async function(req, res, next) {
 
         const count = await Count.addCount({...data, containerId});
 
-        let variance = req.body.cash - target;
-        if (variance >= posThreshold || variance <= negThreshold) {
+        let variance = req.body.cash - +target;
+        if (variance >= +posThreshold || variance <= -negThreshold) {
             variance = (Math.round(variance * 100) / 100).toFixed(2);
             const emailData = {target, posThreshold, negThreshold, variance,
                                 countData: req.body, containerName: name,
