@@ -9,8 +9,8 @@ const createMsg = (recipient, data, variance) => {
     let subject;
     let text;
     let html;
-    const time = formatTime(data.countData.time);
     if (variance) {
+        const time = formatTime(data.countData.time);
         subject = `Variance in ${data.containerName}`;
         text = `Hi ${recipient.firstName}, ${data.userName} reported a
                 variance of $${variance} in ${data.containerName} 

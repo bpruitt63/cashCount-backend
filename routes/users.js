@@ -7,7 +7,7 @@ const userNewSchema = require('../schemas/userNew.json');
 const adminUpdateSchema = require('../schemas/adminUpdate.json');
 const userUpdateSchema = require('../schemas/userUpdate.json');
 const { BadRequestError } = require("../expressError");
-const { createToken } = require("../helpers");
+const { createToken, generatePassword } = require("../helpers");
 const { sendPasswordReset } = require('../email');
 const { ensureAdmin,
         ensureSuperAdmin } = require("../middleware/auth");
