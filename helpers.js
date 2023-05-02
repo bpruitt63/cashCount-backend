@@ -54,9 +54,21 @@ function formatTime(time){
     return formatted;
 };
 
+// Generates random password for reset password function
+function generatePassword() {
+    const charString = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+    let password = '';
+    while (password.length < 10) {
+        const charIndex = Math.floor(Math.random() * 62)
+        password += charString[charIndex];
+    };
+    return password;
+};
+
 module.exports = {
     createToken,
     sqlForPartialUpdate,
     formatCompany,
-    formatTime
+    formatTime,
+    generatePassword
 };

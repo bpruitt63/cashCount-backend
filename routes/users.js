@@ -8,6 +8,7 @@ const adminUpdateSchema = require('../schemas/adminUpdate.json');
 const userUpdateSchema = require('../schemas/userUpdate.json');
 const { BadRequestError } = require("../expressError");
 const { createToken } = require("../helpers");
+const { sendPasswordReset } = require('../email');
 const { ensureAdmin,
         ensureSuperAdmin } = require("../middleware/auth");
 
@@ -155,6 +156,21 @@ router.patch('/:id/company/:companyCode', ensureAdmin, async function(req, res, 
             user.active = companyUser.active;
         };
 
+        return res.json({user});
+    } catch(err) {
+        return next(err);
+    };
+});
+
+
+// Reset forgotten password
+router.patch('/:id/reset_password', async function(req, res, next){
+    try {
+        let user = await User.get(req.params.id);
+        if (user.email !== req.body.email) throw new BadRequestError(`Incorrect email for ${req.params.id}`);
+        const resetPassword = generatePassword();
+        user = await User.updateUserInfo(user.id, {password: resetPassword});
+        await sendPasswordReset(user, {password: resetPassword});
         return res.json({user});
     } catch(err) {
         return next(err);

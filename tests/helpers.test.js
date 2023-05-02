@@ -1,4 +1,4 @@
-const { createToken, sqlForPartialUpdate } = require("../helpers");
+const { createToken, sqlForPartialUpdate, generatePassword } = require("../helpers");
 const jwt = require("jsonwebtoken");
 const { SECRET_KEY } = require("../config");
 
@@ -67,5 +67,21 @@ describe("sqlForPartialUpdate", function () {
             setCols: "\"f1\"=$1, \"f2\"=$2",
             values: ["v1", "v2"],
         });
+    });
+});
+
+
+describe('generatePassword', function() {
+    test('works', function() {
+        const result = generatePassword();
+        const resultSet = new Set(result);
+        expect(result.length).toEqual(10);
+        expect(resultSet.size).toBeGreaterThan(1);
+    });
+
+    test('creates different password each time', function() {
+        const result = generatePassword();
+        const result2 = generatePassword();
+        expect(result).not.toEqual(result2);
     });
 });
