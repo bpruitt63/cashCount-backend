@@ -8,7 +8,7 @@ const containerUpdateSchema = require('../schemas/containerUpdate.json');
 const countSchema = require('../schemas/countSchema.json');
 const { BadRequestError, UnauthorizedError } = require('../expressError');
 const { ensureAdmin } = require("../middleware/auth");
-const sendVarianceEmail = require('../email.js');
+const {sendVarianceEmail} = require('../email.js');
 
 
 const router = new express.Router();

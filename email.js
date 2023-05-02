@@ -9,8 +9,8 @@ const createMsg = (recipient, data, variance) => {
     let subject;
     let text;
     let html;
-    const time = formatTime(data.countData.time);
     if (variance) {
+        const time = formatTime(data.countData.time);
         subject = `Variance in ${data.containerName}`;
         text = `Hi ${recipient.firstName}, ${data.userName} reported a
                 variance of $${variance} in ${data.containerName} 
@@ -24,7 +24,18 @@ const createMsg = (recipient, data, variance) => {
                     Count: $${data.countData.cash.toFixed(2)}<br/>
                     Notes: ${data.countData.note || 'none'}
                 </p>`
-    };
+    } else {
+        subject = 'CashCount Password Reset';
+        text = `Hi ${recipient.firstName}, it looks like you requested a
+                password reset.  Your new password is ${data.password}. 
+                Please reset this to something you will remember when you log in.`
+        html = `<p>
+                    Hi ${recipient.firstName}.<br/>
+                    It looks like you requested a password reset.  
+                        Your new password is ${data.password}.<br/>
+                    Please reset this to something you will remember when you log in.
+                </p>`
+    }
     const msg = {
         to: recipient.email,
         from: 'cashcountnotification@gmail.com',
@@ -52,4 +63,8 @@ const sendVarianceEmail = async (variance, companyCode, data) => {
     };
 };
 
-module.exports = sendVarianceEmail;
+const sendPasswordReset = async (recipient, data) => {
+    await sendEmail(recipient, data);
+};
+
+module.exports = {sendVarianceEmail, sendPasswordReset};
